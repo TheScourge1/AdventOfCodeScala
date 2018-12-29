@@ -16,6 +16,7 @@ trait AdventBase {
 
   def readFile(fname: String): Seq[String] = {
     val fileHandle = getClass.getResourceAsStream("/"+fname)
+    if(fileHandle == null) throw new Exception("File not found: "+"/"+fname)
     return Source.fromInputStream(fileHandle).getLines.toSeq
   }
 }
