@@ -5,8 +5,8 @@ import scala.collection.mutable
 object Exercise2 extends AdventBase{
 
   override def ex1(input: Seq[String]): String = {
-    val twos = input.filter( p => containsMultiple(p,2)).size
-    val threes = input.filter( p => containsMultiple(p,3)).size
+    val twos = input.count( p => containsMultiple(p,2))
+    val threes = input.count( p => containsMultiple(p,3))
     ""+twos * threes
   }
 
