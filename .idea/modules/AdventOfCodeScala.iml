@@ -20,5 +20,6 @@
     <orderEntry type="library" scope="TEST" name="sbt: org.scala-lang.modules:scala-xml_2.12:1.0.6:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="sbt: org.scala-lang:scala-reflect:2.12.7:jar" level="project" />
     <orderEntry type="library" name="sbt: org.scala-lang.modules:scala-parser-combinators_2.12:1.1.0:jar" level="project" />
+    <orderEntry type="library" name="scala-sdk-2.12.7" level="application" />
   </component>
 </module>
