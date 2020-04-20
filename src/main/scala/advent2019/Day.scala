@@ -17,8 +17,8 @@ abstract class Day(day: Int) extends App {
   def testSetB: List[TestCase]
 
   //Define the input value here.
-  def inputA: String = "Day"+day+".txt"
-  def inputB: String = "Day"+day+".txt"
+  def inputA(): String = {"Day"+day+".txt"}
+  def inputB(): String = {"Day"+day+".txt"}
 
   def paramsA: List[String] = List()
   def paramsB: List[String] = List()

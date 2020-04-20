@@ -17,7 +17,7 @@ object Day2 extends Day(2){
       oppCodes(1)=params(0).toInt
       oppCodes(2)=params(1).toInt
     }
-    processOppCode(oppCodes,0)(0).toString()
+    OpcodeProcessor.processDay2OppCode(oppCodes,0,null,null)(0).toString()
   }
 
   override def solutionB(input: List[String],params: List[String]):String = {
@@ -28,18 +28,4 @@ object Day2 extends Day(2){
     "NO Result Found"
   }
 
-  def processOppCode(arr: Array[Int],position: Integer): Array[Int] = {
-    arr(position) match {
-      case 1 => {
-        arr(arr(position+3)) = arr(arr(position+1))+arr(arr(position+2))
-        processOppCode(arr,position+4)
-      }
-      case 2 => {
-        arr(arr(position+3)) = arr(arr(position+1))*arr(arr(position+2))
-        processOppCode(arr,position+4)
-      }
-      case 99 => arr
-      case _ => throw new Exception(s"Unknown value ${arr(position)} at ${position}")
-    }
-  }
 }
