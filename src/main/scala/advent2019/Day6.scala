@@ -30,29 +30,18 @@ object Day6 extends Day(6){
     }
 
     def findPath(start:String,end:String,orbitMap: Map[String,List[String]],path: List[String]) : List[String] = {
-      if(orbitMap.getOrElse(start,List()).contains(end)) return List(end)
-      if(orbitMap.getOrElse(end,List()).contains(start)) return List(end)
+      if(orbitMap.getOrElse(start,List()).contains(end) || orbitMap.getOrElse(end,List()).contains(start)) List(end)
       else{
-        //searchDown
-        var newPath = List[String]()
-        for(downString <- orbitMap.getOrElse(start,List()))
-          {
-            if(!path.contains(downString)) {
-              val downPath = findPath(downString, end, orbitMap, path:+ downString)
-              if (downPath.contains(end) &&
-                (newPath.size == 0 || downPath.size < newPath.size)) newPath = downPath :+ downString
-            }
+        var pathOptions = List[List[String]]()
+        val moveSet = orbitMap.getOrElse(start,List()).toSet
+          .union(orbitMap.keySet.filter(p => orbitMap.getOrElse(p,List()).contains(start)))
+          .filter(s => !path.contains(s))
+
+        for(move <- moveSet) {
+          val downPath = findPath(move, end, orbitMap, path:+ move)
+          if (downPath.contains(end)) pathOptions = pathOptions :+ (downPath :+ move)
           }
-        //searchUp
-        for(upString <- orbitMap.keySet.filter(p => orbitMap.getOrElse(p,List()).contains(start)))
-          {
-            if(!path.contains(upString)){
-              val upPath = findPath(upString,end,orbitMap,path:+ upString)
-              if (upPath.contains(end) &&
-                (newPath.size == 0 || upPath.size < newPath.size)) newPath = upPath :+ upString
-            }
-          }
-        newPath
+        pathOptions.sortBy(f => f.size).headOption.getOrElse(List())
       }
     }
 
