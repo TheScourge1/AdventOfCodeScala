@@ -3,7 +3,7 @@ package advent2019
 object Day6 extends Day(6){
   override def testSetA = List(TestCase("Day6_testa.txt","42"))
 
-  override def testSetB = List(TestCase("Day6_testb.txt","5"))
+  override def testSetB = List(TestCase("Day6_testb.txt","4"))
 
   override def solutionA(input: List[String], params: List[String]) = {
 
@@ -47,7 +47,7 @@ object Day6 extends Day(6){
 
     val path = findPath("YOU","SAN",orbitMap,List())
     println(path)
-    if(path.contains("SAN")) (path.length-1).toString
+    if(path.contains("SAN")) (path.length-2).toString
     else "PATH NOT FOUND"
 
   }

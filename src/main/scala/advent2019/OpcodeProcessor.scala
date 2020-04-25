@@ -25,45 +25,45 @@ object OpcodeProcessor {
     }
   }
 
-  def processDay5OppCode(arr: Array[Int],position: Integer,input: Int,output: List[String]): (Array[Int],List[String]) = {
+  def processDay5OppCode(arr: Array[Int],position: Integer,input: List[Int],output: List[String]): (Array[Int],List[String]) = {
 
     val code = arr(position)%100
     val mode: Array[Int] = Array((arr(position)/100)%10,(arr(position)/1000)%10,(arr(position)/10000)%10)
 
     code match {
-      case 1 => {
+      case 1 => { //add
         arr(arr(position+3)) = getValue(arr,position+1,mode(0))+getValue(arr,position+2,mode(1))
         processDay5OppCode(arr,position+4,input,output)
       }
-      case 2 => {
+      case 2 => { // mul
         arr(arr(position+3)) = getValue(arr,position+1,mode(0))*getValue(arr,position+2,mode(1))
         processDay5OppCode(arr,position+4,input,output)
       }
-      case 3 => {
-        arr(arr(position+1)) = input
-        processDay5OppCode(arr,position+2,input,output)
+      case 3 => { // input
+        arr(arr(position+1)) = input(0)
+        processDay5OppCode(arr,position+2,input.tail,output)
       }
-      case 4 => {
+      case 4 => { // output
         processDay5OppCode(arr,position+2,input,output:+getValue(arr,position+1,mode(0)).toString)
       }
-      case 5 => {
+      case 5 => { // != 0 jump
         if(getValue(arr,position+1,mode(0)) != 0)
           processDay5OppCode(arr,getValue(arr,position+2,mode(1)),input,output)
         else
           processDay5OppCode(arr,position+3,input,output)
       }
-      case 6 => {
+      case 6 => { //== 0 jump
         if(getValue(arr,position+1,mode(0)) == 0)
           processDay5OppCode(arr,getValue(arr,position+2,mode(1)),input,output)
         else
           processDay5OppCode(arr,position+3,input,output)
       }
-      case 7 => {
+      case 7 => { //_1 < _2 then 1 else 0
         if (getValue(arr, position + 1, mode(0)) < getValue(arr, position + 2, mode(1))) arr(arr(position + 3)) = 1
         else arr(arr(position + 3)) = 0
         processDay5OppCode(arr, position + 4, input, output)
       }
-      case 8 => {
+      case 8 => { //_1 = _2 then 1 else 0
         if(getValue(arr,position+1,mode(0)) == getValue(arr,position+2,mode(1))) arr(arr(position+3)) = 1
         else arr(arr(position+3)) = 0
         processDay5OppCode(arr,position+4,input,output)
