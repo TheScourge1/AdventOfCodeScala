@@ -1,5 +1,7 @@
 package advent2019
 
+import advent2019.OpcodeProcessor.Program
+
 object Day7 extends Day(7){
   override def testSetA = List(TestCase("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0","43210"),
     TestCase("3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0","54321"),
@@ -22,7 +24,7 @@ object Day7 extends Day(7){
 
       var inputVal = 0
       for(amp <- List(i1,i2,i3,i4,i5))
-        inputVal = OpcodeProcessor.processDay5OppCode(program.clone(),0,List(amp,inputVal),List())._3(0).toInt
+        inputVal = OpcodeProcessor.processDay5OppCode(Program(program,0),List(amp,inputVal)).output(0).toInt
 
       if(inputVal > maxVal) maxVal = inputVal
     }
@@ -43,16 +45,14 @@ object Day7 extends Day(7){
       val ampVals = List(i1,i2,i3,i4,i5)
 
       var output = 0
-      var amplifiers: Map[Int,(Array[Int],Int,List[String])] = Map[Int,(Array[Int],Int,List[String])]()
-      while(!amplifiers.contains(4) || !OpcodeProcessor.isFinished(amplifiers.get(4).get._1,amplifiers.get(4).get._2)) {
+      var amplifiers = Map[Int,Program]()
+      while(!amplifiers.get(4).map(f => f.isFinished()).getOrElse(false)) {
         for (i <- 0 to 4) {
           val result = OpcodeProcessor.processDay5OppCode(
-            amplifiers.getOrElse(i, (program.clone(), 0, List()))._1,
-            amplifiers.getOrElse(i, (program.clone(), 0, List()))._2,
-            amplifiers.get((i + 4) % 5).map(f => List(f._3.head.toInt)).getOrElse(List[Int](ampVals(i), output)),
-            List[String]())
+            amplifiers.getOrElse(i, Program(program.clone(), 0)),
+            amplifiers.get((i + 4) % 5).map(f => f.output.head.toInt).getOrElse(List[Int](ampVals(i), output)))
           amplifiers = amplifiers + (i -> result)
-          output = result._3(0).toInt
+          output = result.output(0).toInt
         }
       }
       if(output > maxVal) maxVal = output
