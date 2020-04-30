@@ -15,11 +15,11 @@ object Day5 extends Day(5){
 
   override def solutionA(input: List[String], params: List[String]) = {
     val program = input(0).split(",").map(s => s.toInt)
-    OpcodeProcessor.processDay5OppCode(program,0,params.map(p => p.toInt),List())._2.takeRight(1).head
+    OpcodeProcessor.processDay5OppCode(program,0,params.map(p => p.toInt),List())._3.takeRight(1).head
   }
 
   override def solutionB(input: List[String], params: List[String]) = {
     val program = input(0).split(",").map(s => s.toInt)
-    OpcodeProcessor.processDay5OppCode(program,0,params.map(p => p.toInt),List())._2.head
+    OpcodeProcessor.processDay5OppCode(program,0,params.map(p => p.toInt),List())._3.head
   }
 }
