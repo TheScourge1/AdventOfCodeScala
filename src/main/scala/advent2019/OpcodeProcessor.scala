@@ -10,6 +10,7 @@ object OpcodeProcessor {
     }
 
     def isFinished(): Boolean = {
+      if(position == -1) return true
       val code = arr(position)%100
       code == 99
     }
@@ -115,6 +116,7 @@ object OpcodeProcessor {
   }
 
   def isFinished(arr: Array[Int],position: Int): Boolean ={
+    if(position == -1) return true
     val code = arr(position)%100
     code == 99
   }

@@ -50,7 +50,7 @@ object Day7 extends Day(7){
         for (i <- 0 to 4) {
           val result = OpcodeProcessor.processDay5OppCode(
             amplifiers.getOrElse(i, Program(program.clone(), 0)),
-            amplifiers.get((i + 4) % 5).map(f => f.output.head.toInt).getOrElse(List[Int](ampVals(i), output)))
+            if(amplifiers.contains(i)) List[Int](output) else List[Int](ampVals(i), output))
           amplifiers = amplifiers + (i -> result)
           output = result.output(0).toInt
         }
