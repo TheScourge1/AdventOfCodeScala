@@ -2,6 +2,19 @@ package advent2019
 
 object OpcodeProcessor {
 
+  case class Program(arr: Array[Int],position: Integer,output:List[String] = List()) {
+
+    def inputRequired(): Boolean = {
+      val code = arr(position)%100
+      code == 3
+    }
+
+    def isFinished(): Boolean = {
+      val code = arr(position)%100
+      code == 99
+    }
+  }
+
   def processDay2OppCode(arr: Array[Int],position: Integer,input: () => Int,output: (Int) => Unit): (Array[Int]) = {
     arr(position) match {
       case 1 => {
@@ -25,10 +38,10 @@ object OpcodeProcessor {
     }
   }
 
-  def processDay5OppCode(arr: Array[Int],inputPos: Integer,input: List[Int],output: List[String]): (Array[Int],Int,List[String]) = {
+  def processDay5OppCode(prog: Program,input: List[Int]): (Program) = {
 
-    var position = inputPos
-    var program = arr
+    var position = prog.position
+    var program = prog.arr
     var inputList = input
     var resultList = List[String]()
 
@@ -36,7 +49,7 @@ object OpcodeProcessor {
       val result = inputRequired(program,position) match  {
         case false => executeStep(program,position,-1)
         case true => {
-          if(inputList.size == 0) return (program,position,resultList)
+          if(inputList.size == 0) return Program(program,position,resultList)
           val res = executeStep(program,position,inputList.head)
           inputList = inputList.tail
           res
@@ -47,7 +60,7 @@ object OpcodeProcessor {
       if(result._3.isDefined) resultList = resultList :+ result._3.get
     }
 
-   (program,position,resultList)
+   Program(program,position,resultList)
   }
 
   def executeStep(arr: Array[Int],position: Integer,input: Int): (Array[Int],Int,Option[String]) = {
