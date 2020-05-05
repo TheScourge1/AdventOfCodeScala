@@ -2,18 +2,55 @@ package advent2019
 
 object OpcodeProcessor {
 
-  case class Program(arr: Array[Int],position: Integer,output:List[String] = List()) {
+  case class Program(arr: Array[Long],position: Integer,output:List[String] = List(),baseOffset:Int = 0) {
 
-    def inputRequired(): Boolean = {
-      val code = arr(position)%100
-      code == 3
+    def getCode: Int = { (arr(position)%100).toInt}
+    def curVal: Long = { arr(position)}
+
+    def getValue(mode: Int):Long = {
+      val location: Int = mode match {
+        case 0 => arr(position).toInt
+        case 1 => position
+        case 2 => baseOffset + arr(position).toInt
+        case _ => throw new Exception("Unknown parameter code")
+      }
+      if(location >= arr.size) 0
+      else arr(location)
     }
 
-    def isFinished(): Boolean = {
+    def write(pos: Long,value: Long): Program = { write(pos.toInt,value)}
+    def write(pos: Int,value: Long): Program = {
+      if(pos >= arr.size){
+        val newArr = new Array[Long](pos+1)
+        arr.copyToArray(newArr)
+        Program(newArr,position,output,baseOffset).write(pos,value)
+      }
+      else {
+        arr(pos)=value
+        Program(arr,position,output,baseOffset)
+      }
+    }
+
+    def inputRequired(): Boolean = { getCode == 3}
+
+    def isFinished: Boolean = {
       if(position == -1) return true
-      val code = arr(position)%100
-      code == 99
+      getCode == 99
     }
+
+    def move(steps: Long): Program = {
+      Program(arr,position+steps.toInt,output,baseOffset)
+    }
+
+    def jumpTo(newPosition: Long): Program = {
+      Program(arr,newPosition.toInt,output,baseOffset)
+    }
+
+    def addOutput(s: String): Program = {
+      Program(arr,position,output :+ s,baseOffset)
+    }
+
+    def setRelativeBase(baseVal: Long) = { Program(arr,position,output,baseOffset+baseVal.toInt)}
   }
 
   def processDay2OppCode(arr: Array[Int],position: Integer,input: () => Int,output: (Int) => Unit): (Array[Int]) = {
@@ -34,99 +71,81 @@ object OpcodeProcessor {
         output(arr(position+1))
         processDay2OppCode(arr,position+2,input,output)
       }
+
       case 99 => arr
       case _ => throw new Exception(s"Unknown value ${arr(position)} at ${position}")
     }
   }
 
   def processDay5OppCode(prog: Program,input: List[Int]): (Program) = {
-
-    var position = prog.position
-    var program = prog.arr
     var inputList = input
-    var resultList = List[String]()
+    var program = prog
 
-    while(position != -1){
-      val result = inputRequired(program,position) match  {
-        case false => executeStep(program,position,-1)
+    while(!program.isFinished){
+      program = program.inputRequired() match  {
+        case false => executeStep(program,-1)
         case true => {
-          if(inputList.size == 0) return Program(program,position,resultList)
-          val res = executeStep(program,position,inputList.head)
+          if(inputList.size == 0) return program
+          val res = executeStep(program,inputList.head)
           inputList = inputList.tail
           res
         }
       }
-      program = result._1
-      position = result._2
-      if(result._3.isDefined) resultList = resultList :+ result._3.get
     }
 
-   Program(program,position,resultList)
+   program
   }
 
-  def executeStep(arr: Array[Int],position: Integer,input: Int): (Array[Int],Int,Option[String]) = {
-    val code = arr(position)%100
-    val mode: Array[Int] = Array((arr(position)/100)%10,(arr(position)/1000)%10,(arr(position)/10000)%10)
-    code match {
+  def executeStep(prog:Program,input: Int): (Program) = {
+
+    val mode: Array[Int] = Array((prog.curVal.toInt/100)%10,(prog.curVal.toInt/1000)%10,(prog.curVal.toInt/10000)%10)
+
+    prog.getCode match {
       case 1 => { //add
-        arr(arr(position+3)) = getValue(arr,position+1,mode(0))+getValue(arr,position+2,mode(1))
-        (arr,position+4,None)
+        prog.write(prog.move(3).curVal , prog.move(1).getValue(mode(0))+prog.move(2).getValue(mode(1)))
+            .move(4)
       }
       case 2 => { // mul
-        arr(arr(position+3)) = getValue(arr,position+1,mode(0))*getValue(arr,position+2,mode(1))
-        (arr,position+4,None)
+        prog.write(prog.move(3).curVal , prog.move(1).getValue(mode(0))*prog.move(2).getValue(mode(1)))
+            .move(4)
       }
       case 3 => { // input
-        arr(arr(position+1)) = input
-        (arr,position+2,None)
+        prog.write(prog.move(1).curVal , input)
+            .move(2)
       }
       case 4 => { // output
-        (arr,position+2,Some(getValue(arr,position+1,mode(0)).toString))
+        prog.addOutput(prog.move(1).getValue(mode(0)).toString).move(2)
       }
       case 5 => { // != 0 jump
-        if(getValue(arr,position+1,mode(0)) != 0)
-          (arr,getValue(arr,position+2,mode(1)),None)
+        if(prog.move(1).getValue(mode(0)) != 0)
+          prog.jumpTo(prog.move(2).getValue(mode(1)))
         else
-          (arr,position+3,None)
+          prog.move(3)
       }
       case 6 => { //== 0 jump
-        if(getValue(arr,position+1,mode(0)) == 0)
-          (arr,getValue(arr,position+2,mode(1)),None)
+        if(prog.move(1).getValue(mode(0)) == 0)
+          prog.jumpTo(prog.move(2).getValue(mode(1)))
         else
-          (arr,position+3,None)
+          prog.move(3)
       }
       case 7 => { //_1 < _2 then 1 else 0
-        if (getValue(arr, position + 1, mode(0)) < getValue(arr, position + 2, mode(1))) arr(arr(position + 3)) = 1
-        else arr(arr(position + 3)) = 0
-        (arr, position + 4, None)
+        (if (prog.move(1).getValue(mode(0)) < prog.move(2).getValue(mode(1)))
+          prog.write(prog.move(3).curVal , 1)
+        else prog.write(prog.move(3).curVal , 0))
+        .move(4)
       }
       case 8 => { //_1 = _2 then 1 else 0
-        if(getValue(arr,position+1,mode(0)) == getValue(arr,position+2,mode(1))) arr(arr(position+3)) = 1
-        else arr(arr(position+3)) = 0
-        (arr,position+4,None)
+        (if(prog.move(1).getValue(mode(0)) == prog.move(2).getValue(mode(1)))
+          prog.write(prog.move(3).curVal , 1)
+        else prog.write(prog.move(3).curVal , 0))
+        .move(4)
       }
-      case 99 => (arr,-1,None)
-      case _ => throw new Exception(s"Unknown value ${arr(position)} at ${position}")
+      case 9 => { //change offset base
+        prog.setRelativeBase(prog.move(1).curVal)
+          .move(2)
+      }
+      case 99 => Program(prog.arr,-1,prog.output,prog.baseOffset)
+      case _ => throw new Exception(s"Unknown value ${prog.curVal} at ${prog.position}")
     }
   }
-
-  def inputRequired(arr: Array[Int],position: Int): Boolean ={
-    val code = arr(position)%100
-    code == 3
-  }
-
-  def isFinished(arr: Array[Int],position: Int): Boolean ={
-    if(position == -1) return true
-    val code = arr(position)%100
-    code == 99
-  }
-
-  private def getValue(arr: Array[Int],position: Int,mode: Int): Int = {
-    mode match {
-      case 0 => arr(arr(position))
-      case 1 => arr(position)
-      case _ => throw new Exception("Unknown parameter code")
-    }
-  }
-
 }

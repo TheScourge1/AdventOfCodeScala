@@ -12,7 +12,7 @@ object Day7 extends Day(7){
                   "55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10","18216"))
 
   override def solutionA(input: List[String], params: List[String]) = {
-    val program = input(0).split(",").map(s => s.toInt)
+    val program = input(0).split(",").map(s => s.toLong)
     val baseAmpVals = Set(0,1,2,3,4)
     var maxVal = 0
 
@@ -29,10 +29,11 @@ object Day7 extends Day(7){
       if(inputVal > maxVal) maxVal = inputVal
     }
     maxVal.toString
+    //17440
   }
 
   override def solutionB(input: List[String], params: List[String]) =  {
-    val program = input(0).split(",").map(s => s.toInt)
+    val program = input(0).split(",").map(s => s.toLong)
     val baseAmpVals = Set(5,6,7,8,9)
     var maxVal = 0
 
@@ -46,17 +47,18 @@ object Day7 extends Day(7){
 
       var output = 0
       var amplifiers = Map[Int,Program]()
-      while(!amplifiers.get(4).map(f => f.isFinished()).getOrElse(false)) {
+      while(!amplifiers.get(4).map(f => f.isFinished).getOrElse(false)) {
         for (i <- 0 to 4) {
           val result = OpcodeProcessor.processDay5OppCode(
             amplifiers.getOrElse(i, Program(program.clone(), 0)),
             if(amplifiers.contains(i)) List[Int](output) else List[Int](ampVals(i), output))
           amplifiers = amplifiers + (i -> result)
-          output = result.output(0).toInt
+          output = result.output.reverse.head.toInt
         }
       }
       if(output > maxVal) maxVal = output
     }
     maxVal.toString
+    //27561242
   }
 }
