@@ -18,8 +18,12 @@ object OpcodeProcessor {
       else arr(location)
     }
 
-    def getParam(param: Int,modes: Array[Int] ): Long = {
-      this.move(param).getValue(modes(param-1))
+    def getParam(param: Int): Long = {
+      this.move(param).getValue(getModes(param-1))
+    }
+
+    def getModes: Array[Int] = {
+      return Array((curVal.toInt/100)%10,(curVal.toInt/1000)%10,(curVal.toInt/10000)%10)
     }
 
     def write(pos: Long,value: Long,mode: Int): Program = { write(pos.toInt,value,mode)}
@@ -34,6 +38,10 @@ object OpcodeProcessor {
         arr(pos)=value
         Program(arr,position,output,baseOffset)
       }
+    }
+
+    def writeAt(param: Int,value: Long): Program = {
+      write(move(param).curVal,value, getModes(param-1))
     }
 
     def inputRequired(): Boolean = { getCode == 3}
@@ -102,52 +110,49 @@ object OpcodeProcessor {
   }
 
   def executeStep(prog:Program,input: Int): (Program) = {
-
-    val mode: Array[Int] = Array((prog.curVal.toInt/100)%10,(prog.curVal.toInt/1000)%10,(prog.curVal.toInt/10000)%10)
- //   println(prog.curVal + s"\t@${prog.position} - ${prog.baseOffset}")
     prog.getCode match {
       case 1 => { //add
-        prog.write(prog.move(3).curVal ,prog.getParam(1,mode)+prog.getParam(2,mode),mode(2))
+        prog.writeAt(3 ,prog.getParam(1)+prog.getParam(2))
             .move(4)
       }
       case 2 => { // mul
-        prog.write(prog.move(3).curVal , prog.getParam(1,mode)*prog.getParam(2,mode),mode(2))
+        prog.writeAt(3 , prog.getParam(1)*prog.getParam(2))
             .move(4)
       }
       case 3 => { // input
-        prog.write(prog.move(1).curVal , input,mode(0))
+        prog.writeAt(1 , input)
             .move(2)
       }
       case 4 => { // output
-        prog.addOutput(prog.getParam(1,mode).toString)
+        prog.addOutput(prog.getParam(1).toString)
           .move(2)
       }
       case 5 => { // != 0 jump
-        if(prog.getParam(1,mode)!= 0)
-          prog.jumpTo(prog.getParam(2,mode))
+        if(prog.getParam(1)!= 0)
+          prog.jumpTo(prog.getParam(2))
         else
           prog.move(3)
       }
       case 6 => { //== 0 jump
-        if(prog.getParam(1,mode) == 0)
-          prog.jumpTo(prog.getParam(2,mode))
+        if(prog.getParam(1) == 0)
+          prog.jumpTo(prog.getParam(2))
         else
           prog.move(3)
       }
       case 7 => { //_1 < _2 then 1 else 0
-        (if (prog.getParam(1,mode) < prog.getParam(2,mode))
-          prog.write(prog.move(3).curVal , 1,mode(2))
-        else prog.write(prog.move(3).curVal , 0,mode(2)))
+        (if (prog.getParam(1) < prog.getParam(2))
+          prog.writeAt(3 , 1)
+        else prog.writeAt(3 , 0))
         .move(4)
       }
       case 8 => { //_1 = _2 then 1 else 0
-        (if(prog.getParam(1,mode) == prog.getParam(2,mode))
-          prog.write(prog.move(3).curVal , 1,mode(2))
-        else prog.write(prog.move(3).curVal , 0,mode(2)))
+        (if(prog.getParam(1) == prog.getParam(2))
+          prog.writeAt(3 , 1)
+        else prog.writeAt(3, 0))
         .move(4)
       }
       case 9 => { //change relative base
-        prog.setRelativeBase(prog.getParam(1,mode))
+        prog.setRelativeBase(prog.getParam(1))
           .move(2)
       }
       case 99 => Program(prog.arr,-1,prog.output,prog.baseOffset)

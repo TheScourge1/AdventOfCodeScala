@@ -9,19 +9,21 @@ object Day9 extends Day(9){
     TestCase("104,1125899906842624,99","1125899906842624"),
     TestCase("109,2000,109,19,204,-34,99","0"))
 
-  override def paramsA: List[String] = List("1")
-
   override def testSetB = List()
 
   override def solutionA(input: List[String], params: List[String]) = {
     val program = input(0).split(",").map(s => s.toLong)
 
     val res = OpcodeProcessor.processDay5OppCode(Program(program,0),List(1)).output
-    if(res.size > 1) println(s"Error found: ${res}")
     res.head
   }
+//2752191671
 
   override def solutionB(input: List[String], params: List[String]) = {
-    "TO DO"
+    val program = input(0).split(",").map(s => s.toLong)
+
+    val res = OpcodeProcessor.processDay5OppCode(Program(program,0),List(2)).output
+    res.head
   }
+  //87571
 }
