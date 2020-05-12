@@ -63,41 +63,33 @@ object Day10 extends Day(10){
 
   override def solutionB(input: List[String], params: List[String]): String = {
     val map: Array[Array[Boolean]] = input.map(s => s.map(c => if(c.equals('#')) true else false).toArray).toArray
-    val rows = map.size
-    val cols = map(0).size
     val station = (19,20)
 
-    val boundaryList = ListBuffer[(Int,Int)]()
-
-    for(i <- station._1 until cols) boundaryList+=((i,0))
-    for(j <- 0 until rows) boundaryList+=((cols-1,j))
-    for(i <- Range(cols-1,0,-1)) boundaryList+=((i,rows-1))
-    for(j <- Range(rows-1,0,-1)) boundaryList+=((0,j))
-    for(i <- 0 until station._1) boundaryList+=((i,0))
-
-    var laserHits = 0
-    val MAXLASERHITS=200
-    while(true){
-      for(b <- boundaryList){
-        val diff = ((b._1-station._1)/ggd(b._1-station._1,b._2-station._2),
-                    (b._2-station._2)/ggd(b._1-station._1,b._2-station._2))
-        var n=1
-        var hit = false
-        while(n <= ggd(b._1-station._1,b._2-station._2 )&& !hit) {
-          val x = n*(diff._1)+station._1
-          val y = n*(diff._2)+station._2
-          n+=1
-          if(map(x)(y)) {
-            map(x)(y) = false
-            laserHits +=1
-            println("LaserHits: "+laserHits + s" (${x},${y})")
-            hit = true
-            if(laserHits == MAXLASERHITS) return ((x)*100+y).toString
-            if(laserHits == 139) printMatrix(map)
-          }
-        }
+    var degreeMap = Map[Double,List[(Int,Int)]]()
+    for(i <- 0 until map(0).size;j <- 0 until map.size) {
+      if(map(i)(j)){
+        val degree = calcDegree((i,j),station)
+        degreeMap = degreeMap + (degree -> (degreeMap.getOrElse(degree, List[(Int,Int)]()) :+ (i,j)))
       }
     }
-    "ERROR"
+/*
+    println(s"(5,0),(5,5) -> ${calcDegree((5,0),(5,5))}")
+    println(s"(10,0),(5,5) -> ${calcDegree((10,0),(5,5))}")
+    println(s"(10,5),(5,5) -> ${calcDegree((10,5),(5,5))}")
+    println(s"(10,10),(5,5) -> ${calcDegree((10,10),(5,5))}")
+    println(s"(5,10),(5,5) -> ${calcDegree((5,10),(5,5))}")
+    println(s"(0,10),(5,5) -> ${calcDegree((0,10),(5,5))}")
+    println(s"(0,5),(5,5) -> ${calcDegree((0,5),(5,5))}")
+    println(s"(0,0),(5,5) -> ${calcDegree((0,0),(5,5))}")*/
+
+    for(degree <- degreeMap.keySet.toList.sorted) println(s"${degree} -> ${degreeMap.get(degree)}")
+
+    "TODO"
+  }
+
+  def calcDegree(x: (Int,Int), y: (Int,Int)): Double = {
+    val angle = Math.acos((y._2 - x._2) / Math.sqrt(Math.pow(y._2 - x._2, 2) + Math.pow(y._1 - x._1, 2)))
+    if (x._1 >= y._1) angle
+    else 2*Math.PI - angle
   }
 }
