@@ -5,7 +5,8 @@ import scala.collection.mutable.ListBuffer
 object Day10 extends Day(10){
   override def testSetA = List(TestCase("Day10_testa.txt","(3,4) -> 8"),TestCase("Day10_testa2.txt","(11,13) -> 210"))
 
-  override def testSetB = List()
+  override def testSetB = List(TestCase("Day10_testa2.txt","802",List("11,13")))
+  override def paramsB = List("19,20")
 
   override def solutionA(input: List[String], params: List[String]) = {
     val map: Array[Array[Boolean]] = input.map(s => s.map(c => if(c.equals('#')) true else false).toArray).toArray
@@ -63,7 +64,7 @@ object Day10 extends Day(10){
 
   override def solutionB(input: List[String], params: List[String]): String = {
     val map: Array[Array[Boolean]] = input.map(s => s.map(c => if(c.equals('#')) true else false).toArray).toArray
-    val station = (19,20)
+    val station = (params(0).split(",").head.toInt,params(0).split(",").tail.head.toInt)
 
     var degreeMap = Map[Double,List[(Int,Int)]]()
     for(i <- 0 until map(0).size;j <- 0 until map.size) {
@@ -82,7 +83,19 @@ object Day10 extends Day(10){
     println(s"(0,5),(5,5) -> ${calcDegree((0,5),(5,5))}")
     println(s"(0,0),(5,5) -> ${calcDegree((0,0),(5,5))}")*/
 
-    for(degree <- degreeMap.keySet.toList.sorted) println(s"${degree} -> ${degreeMap.get(degree)}")
+    var laserHits = 0
+    for(degree <- degreeMap.keySet.toList.sorted){
+      println(s"${degree} -> ${degreeMap.getOrElse(degree,List())}")
+      if(degreeMap.get(degree).nonEmpty){
+        laserHits +=1
+        val currentHit  = degreeMap.getOrElse(degree,List())
+                        .sortBy(f => Math.pow(f._1-station._1,2)+Math.pow(f._2-station._2,2)).head
+       // println(s"currentHit: ${laserHits} -> ${currentHit}")
+        if(laserHits == 200) return (currentHit._2*100+currentHit._1).toString
+        degreeMap = degreeMap + (degree -> degreeMap.getOrElse(degree,List())
+                                            .sortBy(f => Math.pow(f._1-station._1,2)+Math.pow(f._2-station._2,2)).tail)
+      }
+    }
 
     "TODO"
   }
