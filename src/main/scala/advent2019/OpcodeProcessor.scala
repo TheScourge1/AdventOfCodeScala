@@ -63,6 +63,11 @@ object OpcodeProcessor {
       Program(arr,position,output :+ s,baseOffset)
     }
 
+    def clearOutput():Program = {
+      Program(arr,position,List(),baseOffset)
+    }
+
+
     def setRelativeBase(baseVal: Long) = { Program(arr,position,output,baseOffset+baseVal.toInt)}
   }
 
