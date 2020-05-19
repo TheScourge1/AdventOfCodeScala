@@ -74,18 +74,18 @@ object Day12 extends Day(12) {
   }
 
   def addVals(a: List[(Int,Int,Int)], b: List[(Int,Int,Int)]): List[(Int,Int,Int)] = {
-    var res = List[(Int,Int,Int)]()
-    for(i <- 0 until a.size)
-      res = res :+ ((a(i)._1+ b(i)._1,a(i)._2+b(i)._2,a(i)._3+b(i)._3 ))
-    res
+    (for(i <- 0 until a.size) yield
+      ((a(i)._1+ b(i)._1,a(i)._2+b(i)._2,a(i)._3+b(i)._3 ))).toList
+
   }
 
   def getState(a: List[(Int,Int,Int)], b: List[(Int,Int,Int)],index: Int): String = {
-    index match {
-      case 1 => a.map(t => t._1).toString() + b.map(t => t._1).toString()
-      case 2 => a.map(t => t._2).toString() + b.map(t => t._2).toString()
-      case 3 => a.map(t => t._3).toString() + b.map(t => t._3).toString()
+    val res = index match {
+      case 1 => a.map(t => t._1) ++ b.map(t => t._1)
+      case 2 => a.map(t => t._2) ++ b.map(t => t._2)
+      case 3 => a.map(t => t._3) ++ b.map(t => t._3)
     }
+    res.toString()
   }
 
   def getEnergy(a: (Int,Int,Int)): Int = Math.abs(a._1) + Math.abs(a._2) +Math.abs(a._3)
