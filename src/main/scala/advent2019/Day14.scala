@@ -10,11 +10,8 @@ object Day14 extends Day(14){
     requiredAmount(formulas,"ORE",1).toString
   }
 
-
-
-
   override def solutionB(input: List[String], params: List[String]) = {
-    var formulas = getFormulas(input)
+    val formulas = getFormulas(input)
     val ORESTOCK = 1000000000000L
     var lowerBound = ORESTOCK/requiredAmount(formulas,"ORE",1)
     var upperBound = ORESTOCK
@@ -22,7 +19,6 @@ object Day14 extends Day(14){
       val attempt =  requiredAmount(formulas,"ORE",(lowerBound+upperBound)/2)
       if(attempt > ORESTOCK) upperBound = (lowerBound+upperBound)/2
       else lowerBound = (lowerBound+upperBound)/2
-      //println(s"${lowerBound} - ${upperBound}")
     }
     lowerBound.toString
   }
