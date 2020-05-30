@@ -16,10 +16,7 @@ object Day15 extends Day(15) {
     val progVals = input(0).split(",").map(s => s.toLong)
     val oxigenLocation = findOxigen(Program(progVals,0),List[(Int,Int)]((0,0)))
 
-    findMaxSteps(oxigenLocation._2,List(oxigenLocation._1.last)).toString
-
-
-    "TODO"
+    (findMaxSteps(oxigenLocation._2,List(oxigenLocation._1.last))-1).toString
   }
 
   def findOxigen(inputProgram: Program, hist: List[(Int,Int)]): (List[(Int,Int)],Program) = {
@@ -52,21 +49,18 @@ object Day15 extends Day(15) {
 
   def findMaxSteps(inputProgram: Program, hist: List[(Int,Int)]): Int = {
     var prog = inputProgram
-
-    for(step <- Moves.moves) {
+    val maxSteps = for(step <- Moves.moves) yield {
+      var res = 0
       if(!Moves.visited(hist,step)){
         prog = OpcodeProcessor.processDay5OppCode(prog,List(step))
-        prog.output.last.toInt match {
-          case 0 => //hit a wall. Skip to next location
-          case 1 => {
+        if (prog.output.last.toInt == 1) {
+            res = findMaxSteps(prog,Moves.addLocation(hist,step))
             prog = OpcodeProcessor.processDay5OppCode(prog,List(Moves.backMove(step)))
-            validSteps = validSteps :+ step
-          } // backtrack and save i
         }
       }
+      res
     }
-
-
+   maxSteps.max +1
   }
 
 
