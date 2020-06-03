@@ -3,7 +3,7 @@ package advent2019
 import scala.collection.mutable.ListBuffer
 
 object Day16 extends Day(16){
-  override def testSetA = List(TestCase("12345678","23845678"),TestCase("80871224585914546619083218645595","24176176"),
+  override def testSetA = List(TestCase("12345678","23845678"),TestCase("12345678123456781234567812345678","23845678"),TestCase("80871224585914546619083218645595","24176176"),
     TestCase("19617804207202209144916044189917","73745418"),TestCase("69317163492948606335995924319873","52432133"))
 
   override def testSetB = List(TestCase("03036732577212944063491565474664","84462026"),
@@ -24,7 +24,7 @@ object Day16 extends Day(16){
         newSequence +=Math.abs(newDigit)%10
       }
       sequence = newSequence.toList
-     // println(s"${loop}: - ${sequence}")
+      println(s"${loop}: - ${sequence.foldLeft("")(_+_)}")
     }
 
     sequence.foldLeft("")(_ + _).substring(0,8)
