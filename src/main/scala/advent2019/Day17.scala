@@ -12,12 +12,9 @@ object Day17 extends Day(17){
   override def solutionA(input: List[String], params: List[String]) = {
     val prog = input(0).split(",").map(s => s.toLong)
     val res = OpcodeProcessor.processDay5OppCode(Program(prog,0),List())
-    printOutput(processOutput(res.output))
-    println(getRoute(processOutput(res.output)))
+
     getIntersections(processOutput(res.output)).map(t => t._1*t._2).sum.toString
   }
-
-
 
   def processOutput(code: List[String]): List[List[Char]] =
     code.filter(!_.equals("10")).map(s => s.toInt.toChar).grouped(code.indexOf("10")).toList
@@ -40,11 +37,64 @@ object Day17 extends Day(17){
 
 
   override def solutionB(input: List[String], params: List[String]) = {
-    var prog = input(0).split(",").map(s => s.toLong)
-    prog(0) = 2
-    val res = OpcodeProcessor.processDay5OppCode(Program(prog,0),List())
+    val prog = input(0).split(",").map(s => s.toLong)
 
-    "TODO"
+    var res = OpcodeProcessor.processDay5OppCode(Program(prog,0),List())
+    val route = getRoute(processOutput(res.output))
+    val subRoutes = splitRoute(route)
+    println(subRoutes._1)
+    println(subRoutes._2)
+
+    var progInput = List[Int]()
+    progInput = progInput ++ convertToIntCodes(subRoutes._2)
+    progInput=progInput :+ 10
+    for( l<- subRoutes._1){
+      progInput = progInput ++ convertToIntCodes(l)
+      progInput = progInput :+ 10
+    }
+    progInput = progInput :+ 'n'.toInt
+    progInput = progInput :+ 10
+    prog(0) = 2
+    res = OpcodeProcessor.processDay5OppCode(Program(prog,0),progInput)
+    printOutput(processOutput(res.output))
+    println(res.output)
+    res.output.last
+  }
+
+  def convertToIntCodes(lst: List[String]): List[Int] = {
+    var result = List[Int]()
+    for(s <- lst){
+      result=result :+ s.charAt(0).toInt
+      result=result :+ 44
+    }
+    if(result.size > 0)  result.slice(0,result.size-1)
+    else result
+  }
+
+  def splitRoute(input: List[String]): (List[List[String]],List[String]) = {
+    var a,b,c = List[String]()
+
+    for(ic <- 2 to 20 by 2;ib <-2 to 20 by 2; ia <- 2 to 20 by 2){
+      a = input.slice(0,ia)
+      var ir = 0
+      var invalid = false
+      var routes = List[String]()
+      while(ir<input.size && !invalid){
+        if(input.slice(ir,ir+a.size).equals(a)) {ir +=a.size; routes = routes :+ "A"}
+        else {
+          if (b.size == 0) b = input.slice(ir, ir + ib)
+          if (input.slice(ir, ir + b.size).equals(b)) {ir += b.size; routes = routes :+ "B"}
+          else {
+            if (c.size == 0) c = input.slice(ir, ir + ic)
+            if(input.slice(ir,ir+c.size).equals(c)) {ir +=c.size; routes = routes :+ "C"}
+            else invalid = true
+          }
+        }
+      }
+      if(!invalid) return (List(a,b,c),routes)
+    }
+
+    (List(),List())
   }
 
   def getRoute(input: List[List[Char]]): List[String] = {
@@ -98,9 +148,7 @@ object Day17 extends Day(17){
   }
 
   def isValidLocation(input: List[List[Char]],l: (Int,Int,Int)): Boolean =
-      l._1 >= 0 && l._2 >= 0 &&
-      l._1 < input.size && l._2 < input(0).size &&
-        input(l._1)(l._2).equals('#')
+      l._1 >= 0 && l._2 >= 0 && l._1 < input.size && l._2 < input(0).size && input(l._1)(l._2).equals('#')
 
   def stepForward(l:(Int,Int,Int)) = l._3 match{
     case 0 => (l._1-1,l._2,0)
