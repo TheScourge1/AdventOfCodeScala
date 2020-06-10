@@ -42,39 +42,32 @@ object Day17 extends Day(17){
     var res = OpcodeProcessor.processDay5OppCode(Program(prog,0),List())
     val route = getRoute(processOutput(res.output))
     val subRoutes = splitRoute(route)
-    println(subRoutes._1)
-    println(subRoutes._2)
 
     var progInput = List[Int]()
     progInput = progInput ++ convertToIntCodes(subRoutes._2)
-    progInput=progInput :+ 10
-    for( l<- subRoutes._1){
+    for( l<- subRoutes._1)
       progInput = progInput ++ convertToIntCodes(l)
-      progInput = progInput :+ 10
-    }
     progInput = progInput :+ 'n'.toInt
     progInput = progInput :+ 10
+
     prog(0) = 2
     res = OpcodeProcessor.processDay5OppCode(Program(prog,0),progInput)
-    printOutput(processOutput(res.output))
-    println(res.output)
     res.output.last
   }
 
   def convertToIntCodes(lst: List[String]): List[Int] = {
     var result = List[Int]()
     for(s <- lst){
-      result=result :+ s.charAt(0).toInt
+      s.chars().forEach(c => result=result :+ c.toInt)
       result=result :+ 44
     }
-    if(result.size > 0)  result.slice(0,result.size-1)
+    if(result.size > 0)  result.slice(0,result.size-1) :+ 10
     else result
   }
 
   def splitRoute(input: List[String]): (List[List[String]],List[String]) = {
-    var a,b,c = List[String]()
-
-    for(ic <- 2 to 20 by 2;ib <-2 to 20 by 2; ia <- 2 to 20 by 2){
+     for(ia <- 2 to 20 by 2;ib <-2 to 20 by 2; ic <- 2 to 20 by 2){
+      var a,b,c = List[String]()
       a = input.slice(0,ia)
       var ir = 0
       var invalid = false
@@ -161,7 +154,6 @@ object Day17 extends Day(17){
   def stepRight(l:(Int,Int,Int))= stepForward((l._1,l._2,(l._3+3)%12))
   def stepLeft(l:(Int,Int,Int))= stepForward((l._1,l._2,(12+l._3-3)%12))
 
-  def printOutput(code: List[List[Char]])={
+  def printOutput(code: List[List[Char]])=
     for(l <- code) println(l.map(_.toString).fold("")(_+_))
-  }
 }
