@@ -22,7 +22,7 @@ object Day18 extends Day(18){
     println(path)
     path.map(p => p._2).sum.toString*/
 
-    val res = findShortestPathB(start,keySet.toSet,List(),distanceMap,Map[String,Int]())
+    val res = findShortestPathB(start,keySet.toSet,List(),List(),distanceMap,Map[String,Int]())
     res._1.toString
   }
 
@@ -80,31 +80,34 @@ object Day18 extends Day(18){
         if(newPath.size > 0 && (result.size == 0 || result.map(l => l._2).sum > newPath.map(l => l._2).sum)) result = newPath
       }
     }
+
     println(result.map(_._1.c)+ ": "+result.map(_._2).sum + s" ${Calendar.getInstance().getTime.getTime - start.getTime} ms")
     result
   }
 
-  def findShortestPathB(location:Key,toVisit: Set[Key],currentCost: List[Int],
+  def findShortestPathB(location:Key,toVisit: Set[Key],currentCost: List[Int],resultPath: List[Key],
                         distanceMap: Map[Key,Map[Key,(Int,List[Door])]],resultCache: Map[String,Int]):
-                      (List[Int], Map[String,Int]) = {
-    if(toVisit.size == 0) return (currentCost,resultCache)
+                      (List[Int],Map[String,Int], List[Key]) = {
+    if(toVisit.size == 0) return (currentCost,resultCache,resultPath)
     val start = Calendar.getInstance().getTime
     val reachableLocations = distanceMap.getOrElse(location,Map[Key,(Int,List[Door])]())
 
     var pathCost = List[Int]()
+    var pathResult = List[Key]()
     var cache = resultCache
 
     for(p <- reachableLocations.keySet.intersect(toVisit)){
       if(doorKeys(reachableLocations.get(p).get._2).intersect(toVisit).size == 0){
-        val doStep = findShortestPathB(p,toVisit-p,currentCost,distanceMap,resultCache)
+        val doStep = findShortestPathB(p,toVisit-p,currentCost,resultPath,distanceMap,resultCache)
         if(pathCost.sum == 0 || pathCost.sum > doStep._1.sum){
           pathCost = doStep._1 :+ reachableLocations.get(p).get._1
           cache = resultCache ++ doStep._2
+          pathResult = doStep._3 :+ p
         }
       }
     }
-   // println(pathCost + s" ${Calendar.getInstance().getTime.getTime - start.getTime} ms")
-    (pathCost,cache)
+    println(pathResult.map(_.c) + " :"+pathCost.sum + s" ${Calendar.getInstance().getTime.getTime - start.getTime} ms")
+    (pathCost,cache,pathResult)
   }
 
   def hasKeys(keys: List[Key],doors: List[Door]): Boolean = {
