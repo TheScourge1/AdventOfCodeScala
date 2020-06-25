@@ -22,7 +22,7 @@ object Day18 extends Day(18){
     println(path)
     path.map(p => p._2).sum.toString*/
 
-    val res = findShortestPathB(start,keySet.toSet,List(),List(),distanceMap,Map[String,Int]())
+    val res = findShortestPathB(start,keySet,0,List(),distanceMap,Map[String,Int]())
     res._1.toString
   }
 
@@ -85,44 +85,67 @@ object Day18 extends Day(18){
     result
   }
 
-  def findShortestPathB(location:Key,toVisit: Set[Key],currentCost: List[Int],resultPath: List[Key],
+  def findShortestPathB(location:Key,toVisit: List[Key],currentCost: Int,resultPath: List[Key],
                         distanceMap: Map[Key,Map[Key,(Int,List[Door])]],resultCache: Map[String,Int]):
-                      (List[Int],Map[String,Int], List[Key]) = {
+                      (Int,Map[String,Int],List[Key]) = {
     if(toVisit.size == 0) return (currentCost,resultCache,resultPath)
+    else if(resultCache.contains(sortedKeySet(toVisit)))
+      return (resultCache.get(sortedKeySet(toVisit)).get,resultCache,resultPath ++ toVisit )
     val start = Calendar.getInstance().getTime
     val reachableLocations = distanceMap.getOrElse(location,Map[Key,(Int,List[Door])]())
 
-    var pathCost = List[Int]()
-    var pathResult = List[Key]()
+    var pathCost = 0
     var cache = resultCache
+    var newPath = resultPath
 
-    for(p <- reachableLocations.keySet.intersect(toVisit)){
-      if(doorKeys(reachableLocations.get(p).get._2).intersect(toVisit).size == 0){
-        val doStep = findShortestPathB(p,toVisit-p,currentCost,resultPath,distanceMap,resultCache)
-        if(pathCost.sum == 0 || pathCost.sum > doStep._1.sum){
-          pathCost = doStep._1 :+ reachableLocations.get(p).get._1
+    for(p <- reachableLocations.keySet.intersect(toVisit.toSet)){
+      if(hasNoKey(toVisit,reachableLocations.get(p).get._2)){
+        val doStep = findShortestPathB(p,(toVisit.toSet - p).toList,currentCost+ reachableLocations.get(p).get._1,
+          resultPath:+ p,distanceMap,resultCache)
+        if(doStep._1 > 0 && (pathCost ==  0 || pathCost > doStep._1)){
+          pathCost = doStep._1
+          newPath = doStep._3
           cache = resultCache ++ doStep._2
-          pathResult = doStep._3 :+ p
         }
       }
     }
-    println(pathResult.map(_.c) + " :"+pathCost.sum + s" ${Calendar.getInstance().getTime.getTime - start.getTime} ms")
-    (pathCost,cache,pathResult)
+    println(newPath.map(_.c)+" :"+pathCost + s" ${Calendar.getInstance().getTime.getTime - start.getTime} ms")
+    (pathCost,cache,newPath)
   }
 
-  def hasKeys(keys: List[Key],doors: List[Door]): Boolean = {
-    val keyChars = keys.map(k => k.c)
-    val doorChars = doors.map(k => k.c)
+  def findShortestPathC(startLocation:Key, distanceMap: Map[Key,Map[Key,(Int,List[Door])]]): Int = {
+    val result = 0
+
+    def nextStepCost(visited: List[Key],cost: Int,toVisitMap: Map[Key,Map[Key,(Int,List[Door])]]): (Int,List[Key]) = {
+      if(toVisitMap.size == 0) return (cost,visited)
+      val newLocation = visited.last
+      val nextLocations = toVisitMap.get(visited.last)
+      val nextVisitMap = toVisitMap - newLocation
+      for(l <- nextLocations) {
+
+      }
+    }
+
+
+    result
+  }
+
+  def hasKeys(keys: Iterable[Key],doors: Iterable[Door]): Boolean = {
+    val keyChars = keys.map(k => k.c).toList
+    val doorChars = doors.map(k => k.c).toList
 
     for(door <- doorChars)
       if(!keyChars.contains('a' + door - 'A')) return false
     true
   }
 
-  def doorKeys(doors: List[Door]) : Set[Key] = {
-    var result = Set[Key]()
-    for(door <- doors) result = result + Key(('a' + door.c - 'A').toChar,-1,-1)
-    result
+  def hasNoKey(keys: Iterable[Key],doors: Iterable[Door]): Boolean = {
+    val keyChars = keys.map(k => k.c).toList
+    val doorChars = doors.map(k => k.c).toList
+
+    for(door <- doorChars)
+      if(keyChars.contains('a' + door - 'A')) return false
+    true
   }
 
 
