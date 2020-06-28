@@ -22,8 +22,11 @@ object Day18 extends Day(18){
     println(path)
     path.map(p => p._2).sum.toString*/
 
-    val res = findShortestPathB(start,keySet,0,List(),distanceMap,Map[String,Int]())
-    res._1.toString
+   // val res = findShortestPathB(start,keySet,0,List(),distanceMap,Map[String,Int]())
+
+    val res = findShortestPathC(start,distanceMap)
+
+    res.toString
   }
 
   def findStartLocation(matrix: Array[Array[Char]]): Key = {
@@ -115,20 +118,27 @@ object Day18 extends Day(18){
 
   def findShortestPathC(startLocation:Key, distanceMap: Map[Key,Map[Key,(Int,List[Door])]]): Int = {
     val result = 0
+    val distArr = toDistanceArray(distanceMap)
 
-    def nextStepCost(visited: List[Key],cost: Int,toVisitMap: Map[Key,Map[Key,(Int,List[Door])]]): (Int,List[Key]) = {
-      if(toVisitMap.size == 0) return (cost,visited)
-      val newLocation = visited.last
-      val nextLocations = toVisitMap.get(visited.last)
-      val nextVisitMap = toVisitMap - newLocation
-      for(l <- nextLocations) {
-
-      }
+    for(i<- 0 until distArr.size) {
+      for(j<-0 until distArr.size) print(distArr(i)(j)._1+"\t")
+      println
     }
 
 
     result
   }
+
+  def toDistanceArray(distanceMap: Map[Key,Map[Key,(Int,List[Door])]]): Array[Array[(Int,List[Int])]]= {
+    val res = Array.fill[(Int,List[Int])](distanceMap.size,distanceMap.size)((-1),List())
+    val keyList = distanceMap.keySet.toList.sortBy(_.c)
+    for(i <- 0 until keyList.size)
+      for(k <- distanceMap.get(keyList(i)).get)
+        res(i)(keyList.indexOf(k._1)) = (k._2._1,keyConditions(keyList,k._2._2))
+    res
+  }
+
+  def keyConditions(keyList: List[Key],doorList: List[Door]):List[Int] = doorList.map(d => keyList.indexOf(d.c-'A'+'a'))
 
   def hasKeys(keys: Iterable[Key],doors: Iterable[Door]): Boolean = {
     val keyChars = keys.map(k => k.c).toList
