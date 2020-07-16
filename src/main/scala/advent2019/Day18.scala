@@ -23,7 +23,9 @@ object Day18 extends Day(18){
     printMatrix(res._2)
 
     val resList = findShortestPath(List(res._1.indexOf(Key('@'))), costResArr,condResArr,0,0)
-    val pathCosts = (for(j <- 0 until resList.size-1) yield res._2(j)(j+1))
+    val pathCosts = (for(j <- 0 until resList.size-1) yield res._2(resList(j))(resList(j+1)))
+    println("Path:"+resList.toString)
+    println("Costs"+pathCosts.toString)
     pathCosts.sum.toString
   }
 
@@ -113,9 +115,11 @@ object Day18 extends Day(18){
     var newSize = 0
     var newMinSize = minPathSize
     for(i <- 0 until distArr.size){
-      if(!path.contains(i) && minPathSize > currPathSize + distArr(currLoc)(i) && (condArr(currLoc)(i).diff(path).size == 0)){
+      if(!path.contains(i) && (minPathSize == 0 || minPathSize > currPathSize + distArr(currLoc)(i)) && (condArr(currLoc)(i).diff(path).size == 0)){
+        //println("Path: "+path + " - conditions: "+condArr(currLoc)(i) + "-> "+condArr(currLoc)(i).diff(path))
+
         val tmpPath = findShortestPath(path :+ i,distArr,condArr,newMinSize,currPathSize + distArr(currLoc)(i))
-        val tmpSize = (for(j <- 0 until tmpPath.size-1) yield distArr(j)(j+1)).sum
+        val tmpSize = (for(j <- 0 until tmpPath.size-1) yield distArr(tmpPath(j))(tmpPath(j+1))).sum
         if(newSize == 0 || tmpSize < newSize){
           newPath = tmpPath
           newSize = tmpSize
@@ -123,6 +127,9 @@ object Day18 extends Day(18){
         }
       }
     }
+
+    val costs = for(j <- 0 until newPath.size-1) yield distArr(newPath(j))(newPath(j+1))
+    println("Path: "+newPath + " - "+costs +" cost: "+newSize)
     newPath
   }
 
