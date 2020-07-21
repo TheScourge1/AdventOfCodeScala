@@ -18,14 +18,18 @@ object Day18 extends Day(18){
     val keyRes = res._1
     val costResArr = res._2
     val condResArr = Array.ofDim[List[Int]](keyRes.size,keyRes.size)
+    val prefList: Map[Int,Int] =
+      (for(singleNeighbour <- distanceGrid.getKeys().filter(k => distanceGrid.getNeighbours(k).size  == 1))
+        yield ((distanceGrid.getNeighbours(singleNeighbour).head, singleNeighbour)))
+        .toList
+      .map(kk => (keyRes.indexOf(kk._1) -> keyRes.indexOf(kk._2))).toMap
     for(i<-0 until keyRes.size;j <- 0 until keyRes.size) condResArr(i)(j) = res._3(i)(j).map(k => keyRes.indexOf(k))
     println(res._1)
-    printMatrix(res._2)
+    println(prefList)
+    //printMatrix(res._2)
 
-    val resList = findShortestPath(List(res._1.indexOf(Key('@'))), costResArr,condResArr,0,0)
-    val pathCosts = (for(j <- 0 until resList.size-1) yield res._2(resList(j))(resList(j+1)))
-    println("Path:"+resList.toString)
-    println("Costs"+pathCosts.toString)
+    val resList = findShortestPath(List(res._1.indexOf(Key('@'))), costResArr,condResArr,prefList,0,0)
+    val pathCosts = for(j <- 0 until resList.size-1) yield res._2(resList(j))(resList(j+1))
     pathCosts.sum.toString
   }
 
@@ -71,7 +75,7 @@ object Day18 extends Day(18){
 
       for(loc <- newLocations) {
         val newVal = matrix(loc._1)(loc._2)
-        if(isKey(newVal)) newGrid = newGrid.addMove(startKey,Key(newVal),steps.size,doors,false)
+        if(isKey(newVal)) newGrid = newGrid.addMove(startKey,Key(newVal),steps.size,doors)
         else if(isDoor(newVal)) newGrid = findClosedKeys(steps:+loc,doors :+ Door(newVal),matrix,newGrid)
         else  newGrid = findClosedKeys(steps:+loc,doors,matrix,newGrid)
         }
@@ -87,8 +91,12 @@ object Day18 extends Day(18){
       val newOptions = grid.getNeighbours(path.last)
       var result = Map[Key,(Int,List[Door])]()
       for(key <- newOptions -- path){
-            val stepCost = grid.getVisitCost(path.last,key)
-            result = result + (key -> (visitCost + stepCost._1,doors ++ stepCost._2))
+        val stepCost = grid.getVisitCost(path.last,key)
+        result = result + (key -> (visitCost + stepCost._1,doors ++ stepCost._2))
+        val nextSteps = doStep(path :+ key,result.get(key).get._1,result.get(key).get._2,grid)
+        for (nextStep <- nextSteps.keySet)
+          if(!result.contains(nextStep) ||
+            result.contains(nextStep) && (nextSteps.get(nextStep).get._1 < result.get(key).get._1 ))
             result = result ++ doStep(path :+ key,result.get(key).get._1,result.get(key).get._2,grid)
         }
       result
@@ -106,27 +114,33 @@ object Day18 extends Day(18){
     (keyList,pathCostArr,conditionsArr)
   }
 
-  def findShortestPath(path: List[Int],distArr: Array[Array[Int]], condArr: Array[Array[List[Int]]]
-                       ,minPathSize:Int,currPathSize: Int): List[Int] =  {
+  def findShortestPath(path: List[Int],distArr: Array[Array[Int]], condArr: Array[Array[List[Int]]],
+                       prefList: Map[Int,Int],minPathSize:Int,currPathSize: Int): List[Int] =  {
     if(path.size == distArr.size) return path
 
     val currLoc = path.last
     var newPath = List[Int]()
     var newSize = 0
     var newMinSize = minPathSize
-    for(i <- 0 until distArr.size){
-      if(!path.contains(i) && (minPathSize == 0 || minPathSize > currPathSize + distArr(currLoc)(i)) && (condArr(currLoc)(i).diff(path).size == 0)){
-        //println("Path: "+path + " - conditions: "+condArr(currLoc)(i) + "-> "+condArr(currLoc)(i).diff(path))
-
-        val tmpPath = findShortestPath(path :+ i,distArr,condArr,newMinSize,currPathSize + distArr(currLoc)(i))
-        val tmpSize = (for(j <- 0 until tmpPath.size-1) yield distArr(tmpPath(j))(tmpPath(j+1))).sum
-        if(newSize == 0 || tmpSize < newSize){
-          newPath = tmpPath
-          newSize = tmpSize
-          if(newSize < newMinSize) newMinSize = newSize
+    val prefGotoLoc = prefList.getOrElse(currLoc,-1)
+    if(prefGotoLoc != -1 && !path.contains(prefGotoLoc) && (condArr(currLoc)(prefGotoLoc).diff(path).size == 0)) {
+      newPath = findShortestPath(path :+ prefGotoLoc, distArr, condArr, prefList, newMinSize,
+        currPathSize + distArr(currLoc)(prefGotoLoc))
+    } else {
+      for(i <- 0 until distArr.size){
+        if(!path.contains(i) && (minPathSize == 0 || minPathSize > currPathSize + distArr(currLoc)(i))
+          && (condArr(currLoc)(i).diff(path).size == 0)){
+          val tmpPath = findShortestPath(path :+ i,distArr,condArr,prefList,newMinSize,currPathSize + distArr(currLoc)(i))
+          val tmpSize = (for(j <- 0 until tmpPath.size-1) yield distArr(tmpPath(j))(tmpPath(j+1))).sum
+          if(newSize == 0 || tmpSize < newSize){
+            newPath = tmpPath
+            newSize = tmpSize
+            if(newSize < newMinSize) newMinSize = newSize
+          }
         }
       }
     }
+
 
     val costs = for(j <- 0 until newPath.size-1) yield distArr(newPath(j))(newPath(j+1))
     println("Path: "+newPath + " - "+costs +" cost: "+newSize)
@@ -193,16 +207,14 @@ object Day18 extends Day(18){
   case class Key(c: Char){ override def toString() = c.toString}
   case class Door(c: Char){ override def toString() = c.toString}
 
-  class Grid(grid: Map[Key,Map[Key,(Int,List[Door],Boolean)]] = Map()) {
+  class Grid(grid: Map[Key,Map[Key,(Int,List[Door])]] = Map()) {
 
-    def getNeighbours(key: Key):Set[Key] = grid.getOrElse(key,Map[Key,(Int,List[Door],Boolean)]()).keySet
-    def getPreferedNeighbours(key: Key):Set[Key] =
-      grid.getOrElse(key,Map[Key,(Int,List[Door],Boolean)]()).filter(f => f._2._3).keySet
-    def getVisitCost(fromKey:Key,toKey:Key): (Int,List[Door],Boolean)
-      = grid.getOrElse(fromKey,Map[Key,(Int,List[Door],Boolean)]()).getOrElse(toKey,(-1,List(),false))
+    def getNeighbours(key: Key):Set[Key] = grid.getOrElse(key,Map[Key,(Int,List[Door])]()).keySet
+    def getVisitCost(fromKey:Key,toKey:Key): (Int,List[Door])
+      = grid.getOrElse(fromKey,Map[Key,(Int,List[Door])]()).getOrElse(toKey,(-1,List()))
 
-    def addMove(fromKey:Key, toKey: Key,cost:Int, conditions: List[Door],prefered: Boolean): Grid = {
-      new Grid(grid + (fromKey -> grid.getOrElse(fromKey,Map[Key,(Int,List[Door],Boolean)]()). + (toKey -> (cost,conditions,prefered))))
+    def addMove(fromKey:Key, toKey: Key,cost:Int, conditions: List[Door]): Grid = {
+      new Grid(grid + (fromKey -> grid.getOrElse(fromKey,Map[Key,(Int,List[Door])]()). + (toKey -> (cost,conditions))))
     }
 
     def removeKey(key: Key) = new Grid(grid - key)
