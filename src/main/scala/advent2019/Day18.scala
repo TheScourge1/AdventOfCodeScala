@@ -18,23 +18,32 @@ object Day18 extends Day(18){
     val startOptions = distanceGrid.getNeighbours(Key('@'))
       .filter(k => distanceGrid.getVisitConditions(Key('@'),k).isEmpty)
       .toList
-    val path = findShortestPath(startOptions,List(),0,distanceGrid)
+    val path = findShortestPath(startOptions.toSet,List(Key('@')),distanceGrid.getNeighbours(Key('@')) -- startOptions,0,distanceGrid)
 
+    println("Result: "+path._2.toString)
     path._2.toString
   }
 
-  def findShortestPath(toVisit: List[Key],visited: List[Key],currentCost: Int,distanceGrid:Grid): (List[Key],Int) ={
-    if(toVisit.size == 0)
-      if(visited.size == distanceGrid.getKeys().size) return (visited,currentCost)
-      else return (List(),-1)
+  def findShortestPath(toVisit: Set[Key],visited: List[Key],cannotVisitYet: Set[Key],currentCost: Int,distanceGrid:Grid): (List[Key],Int) ={
+    if(cannotVisitYet.size == 0 && toVisit.size == 0) return (visited,currentCost)
+    else if(toVisit.size == 0) return (List(),-1)
 
-    var bestPath = List()
+    val currentKey = visited.last
+    var bestPath = List[Key]()
     var optimalCost = -1
     for(nextKey <- toVisit){
+      val newKeyOptions = distanceGrid.getNewReachOptions(visited,nextKey)
+      val newPathOption = findShortestPath((toVisit - nextKey)++ newKeyOptions,visited :+ nextKey,cannotVisitYet -- newKeyOptions,
+        currentCost+distanceGrid.getVisitCost(currentKey,nextKey),distanceGrid)
 
+      if(newPathOption._2 != -1 && (optimalCost == -1 || optimalCost > newPathOption._2)){
+        bestPath = newPathOption._1
+        optimalCost = newPathOption._2
+      }
     }
 
-    (visited,currentCost)
+    println(bestPath.toString+": "+optimalCost)
+    (bestPath,optimalCost)
   }
 
 
@@ -108,6 +117,16 @@ object Day18 extends Day(18){
     def getNeighbours(key: Key): Set[Key] = grid.getOrElse(key, Map[Key, (Int, List[Door])]()).keySet
     def getVisitCost(fromKey: Key, toKey: Key): Int = getVisitCostConditions(fromKey,toKey)._1
     def getVisitConditions(fromKey: Key, toKey: Key): List[Door] = getVisitCostConditions(fromKey,toKey)._2
+
+    def getNewReachOptions(visited: List[Key],newKey: Key): List[Key] = {
+      val fromStartConditions = getFromKeyOptions(Key('@'))
+      var result = List[Key]()
+      for(key <- fromStartConditions.keySet) {
+        val keysNeeded = fromStartConditions.get(key).get._2.map(d => toDoorKey(d))
+        if(keysNeeded.contains(newKey) && (keysNeeded diff visited).size == 1) result = result :+ key
+      }
+      result
+    }
 
     def addMove(fromKey: Key, toKey: Key, cost: Int, conditions: List[Door]): Grid =
       new Grid(grid + (fromKey -> getFromKeyOptions(fromKey).+(toKey -> (cost, conditions))))
