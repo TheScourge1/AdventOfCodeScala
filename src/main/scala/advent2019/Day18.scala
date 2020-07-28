@@ -18,15 +18,17 @@ object Day18 extends Day(18){
     val startOptions = distanceGrid.getNeighbours(Key('@'))
       .filter(k => distanceGrid.getVisitConditions(Key('@'),k).isEmpty)
       .toList
-    val path = findShortestPath(startOptions.toSet,List(Key('@')),distanceGrid.getNeighbours(Key('@')) -- startOptions,0,distanceGrid)
+    val path = findShortestPath(startOptions.toSet,List(Key('@')),distanceGrid.getNeighbours(Key('@')) -- startOptions,0,distanceGrid,new Buffer())
 
     println("Result: "+path._2.toString)
     path._2.toString
   }
 
-  def findShortestPath(toVisit: Set[Key],visited: List[Key],cannotVisitYet: Set[Key],currentCost: Int,distanceGrid:Grid): (List[Key],Int) ={
+  def findShortestPath(toVisit: Set[Key],visited: List[Key],cannotVisitYet: Set[Key],currentCost: Int,distanceGrid:Grid,buffer: Buffer): (List[Key],Int) ={
     if(cannotVisitYet.size == 0 && toVisit.size == 0) return (visited,currentCost)
     else if(toVisit.size == 0) return (List(),-1)
+
+    if(buffer.getFromCache(toVisit++cannotVisitYet).isDefined) return buffer.getFromCache(toVisit++cannotVisitYet).get
 
     val currentKey = visited.last
     var bestPath = List[Key]()
@@ -34,11 +36,12 @@ object Day18 extends Day(18){
     for(nextKey <- toVisit){
       val newKeyOptions = distanceGrid.getNewReachOptions(visited,nextKey)
       val newPathOption = findShortestPath((toVisit - nextKey)++ newKeyOptions,visited :+ nextKey,cannotVisitYet -- newKeyOptions,
-        currentCost+distanceGrid.getVisitCost(currentKey,nextKey),distanceGrid)
+        currentCost+distanceGrid.getVisitCost(currentKey,nextKey),distanceGrid,buffer)
 
       if(newPathOption._2 != -1 && (optimalCost == -1 || optimalCost > newPathOption._2)){
         bestPath = newPathOption._1
         optimalCost = newPathOption._2
+        buffer.addToCache(toVisit++cannotVisitYet,bestPath,optimalCost)
       }
     }
 
@@ -147,5 +150,18 @@ object Day18 extends Day(18){
       }
       b.toString()
     }
+  }
+
+  class Buffer(){
+    private var cacheMap = Map[String,(List[Key],Int)]()
+    private def calcHash(lst: Set[Key]): String = lst.toList.sortBy(k => k.c).foldRight("")(_ + _)
+
+    def addToCache(toVisit: Set[Key],path: List[Key],cost: Int) = {
+      cacheMap = cacheMap + (calcHash(toVisit) -> (path,cost))
+    }
+
+    def getFromCache(toVisit: Set[Key]) : Option[(List[Key],Int)] = cacheMap.get(calcHash(toVisit))
+
+
   }
 }
