@@ -3,7 +3,7 @@ package advent2019
 import scala.collection.mutable.ListBuffer
 
 object Day18 extends Day(18){
-  override def testSetA = List(TestCase("Day18_testa.txt","86"),TestCase("Day18_testa2.txt","132"),TestCase("Day18_testa3.txt","136"))
+  override def testSetA = List(/*TestCase("Day18_testa.txt","86"),*/TestCase("Day18_testa2.txt","132"),TestCase("Day18_testa3.txt","136"))
 
   override def testSetB = List()
 
@@ -24,13 +24,15 @@ object Day18 extends Day(18){
     path._2.toString
   }
 
-  def findShortestPath(toVisit: Set[Key],visited: List[Key],cannotVisitYet: Set[Key],currentCost: Int,distanceGrid:Grid,buffer: Buffer): (List[Key],Int) ={
+  def findShortestPath(toVisit: Set[Key],visited: List[Key],cannotVisitYet: Set[Key],
+                       currentCost: Int,distanceGrid:Grid,buffer: Buffer): (List[Key],Int) ={
     if(cannotVisitYet.size == 0 && toVisit.size == 0) return (visited,currentCost)
     else if(toVisit.size == 0) return (List(),-1)
 
-    if(buffer.getFromCache(toVisit++cannotVisitYet).isDefined) return buffer.getFromCache(toVisit++cannotVisitYet).get
-
     val currentKey = visited.last
+    if(buffer.getFromCache(currentKey,toVisit++cannotVisitYet).isDefined)
+      return buffer.getFromCache(currentKey,toVisit++cannotVisitYet).get
+
     var bestPath = List[Key]()
     var optimalCost = -1
     for(nextKey <- toVisit){
@@ -38,10 +40,11 @@ object Day18 extends Day(18){
       val newPathOption = findShortestPath((toVisit - nextKey)++ newKeyOptions,visited :+ nextKey,cannotVisitYet -- newKeyOptions,
         currentCost+distanceGrid.getVisitCost(currentKey,nextKey),distanceGrid,buffer)
 
+
       if(newPathOption._2 != -1 && (optimalCost == -1 || optimalCost > newPathOption._2)){
         bestPath = newPathOption._1
         optimalCost = newPathOption._2
-        buffer.addToCache(toVisit++cannotVisitYet,bestPath,optimalCost)
+        buffer.addToCache(nextKey,toVisit-nextKey++cannotVisitYet,bestPath,optimalCost)
       }
     }
 
@@ -154,13 +157,13 @@ object Day18 extends Day(18){
 
   class Buffer(){
     private var cacheMap = Map[String,(List[Key],Int)]()
-    private def calcHash(lst: Set[Key]): String = lst.toList.sortBy(k => k.c).foldRight("")(_ + _)
+    private def calcHash(loc:Key,lst: Set[Key]): String = (loc +: lst.toList.sortBy(k => k.c)).foldRight("")(_ + _)
 
-    def addToCache(toVisit: Set[Key],path: List[Key],cost: Int) = {
-      cacheMap = cacheMap + (calcHash(toVisit) -> (path,cost))
+    def addToCache(location:Key, toVisit: Set[Key],path: List[Key],cost: Int) = {
+      cacheMap = cacheMap + (calcHash(location,toVisit) -> (path,cost))
     }
 
-    def getFromCache(toVisit: Set[Key]) : Option[(List[Key],Int)] = cacheMap.get(calcHash(toVisit))
+    def getFromCache(location: Key,toVisit: Set[Key]) : Option[(List[Key],Int)] = cacheMap.get(calcHash(location,toVisit))
 
 
   }
