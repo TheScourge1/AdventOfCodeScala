@@ -3,7 +3,7 @@ package advent2019
 import scala.collection.mutable.ListBuffer
 
 object Day18 extends Day(18){
-  override def testSetA = List(/*TestCase("Day18_testa.txt","86"),*/TestCase("Day18_testa2.txt","132"),TestCase("Day18_testa3.txt","136"))
+  override def testSetA = List(TestCase("Day18_testa.txt","86"),TestCase("Day18_testa2.txt","132")/*,TestCase("Day18_testa3.txt","136"),TestCase("Day18_testa4.txt","81")*/)
 
   override def testSetB = List()
 
@@ -18,15 +18,15 @@ object Day18 extends Day(18){
     val startOptions = distanceGrid.getNeighbours(Key('@'))
       .filter(k => distanceGrid.getVisitConditions(Key('@'),k).isEmpty)
       .toList
-    val path = findShortestPath(startOptions.toSet,List(Key('@')),distanceGrid.getNeighbours(Key('@')) -- startOptions,0,distanceGrid,new Buffer())
+    val path = findShortestPath(startOptions.toSet,List(Key('@')),distanceGrid.getNeighbours(Key('@')) -- startOptions,distanceGrid,new Buffer())
 
-    println("Result: "+path._2.toString)
+    println("Result: "+path._1.reverse+" - "+path._2.toString)
     path._2.toString
   }
 
   def findShortestPath(toVisit: Set[Key],visited: List[Key],cannotVisitYet: Set[Key],
-                       currentCost: Int,distanceGrid:Grid,buffer: Buffer): (List[Key],Int) ={
-    if(cannotVisitYet.size == 0 && toVisit.size == 0) return (visited,currentCost)
+                       distanceGrid:Grid,buffer: Buffer): (List[Key],Int) = {
+    if(cannotVisitYet.size == 0 && toVisit.size == 0) return (List(),0)
     else if(toVisit.size == 0) return (List(),-1)
 
     val currentKey = visited.last
@@ -37,17 +37,16 @@ object Day18 extends Day(18){
     var optimalCost = -1
     for(nextKey <- toVisit){
       val newKeyOptions = distanceGrid.getNewReachOptions(visited,nextKey)
-      val newPathOption = findShortestPath((toVisit - nextKey)++ newKeyOptions,visited :+ nextKey,cannotVisitYet -- newKeyOptions,
-        currentCost+distanceGrid.getVisitCost(currentKey,nextKey),distanceGrid,buffer)
+      val newPathOption = findShortestPath((toVisit - nextKey)++ newKeyOptions,
+        visited :+ nextKey,cannotVisitYet -- newKeyOptions,distanceGrid,buffer)
 
-
-      if(newPathOption._2 != -1 && (optimalCost == -1 || optimalCost > newPathOption._2)){
-        bestPath = newPathOption._1
-        optimalCost = newPathOption._2
-        buffer.addToCache(nextKey,toVisit-nextKey++cannotVisitYet,bestPath,optimalCost)
+      if(newPathOption._2 != -1 && (optimalCost == -1 || optimalCost > newPathOption._2+distanceGrid.getVisitCost(currentKey,nextKey))){
+        bestPath = newPathOption._1 :+ nextKey
+        optimalCost = newPathOption._2 + distanceGrid.getVisitCost(currentKey,nextKey)
       }
     }
 
+    buffer.addToCache(currentKey,toVisit-currentKey++cannotVisitYet,bestPath,optimalCost)
     println(bestPath.toString+": "+optimalCost)
     (bestPath,optimalCost)
   }
@@ -105,13 +104,6 @@ object Day18 extends Day(18){
   def isDoorKey(k: Key, d: Door) = k.c - 'a' + 'A' == d.c
   def toDoorKey(d: Door) = Key((d.c - 'A' + 'a').toChar)
 
-  def printMatrix(distArr: Array[Array[Int]]) = {
-    for(i<- distArr.indices) {
-      for(j<- distArr.indices) print(distArr(i)(j)+"\t")
-      println
-    }
-  }
-
   case class Key(c: Char){ override def toString() = c.toString}
   case class Door(c: Char){ override def toString() = c.toString}
 
@@ -137,8 +129,6 @@ object Day18 extends Day(18){
     def addMove(fromKey: Key, toKey: Key, cost: Int, conditions: List[Door]): Grid =
       new Grid(grid + (fromKey -> getFromKeyOptions(fromKey).+(toKey -> (cost, conditions))))
 
-    def removeKey(key: Key) = new Grid(grid - key)
-    def removeKeys(keys: Set[Key]) = new Grid(grid -- keys)
     def getKeys(): Set[Key] = grid.keySet
 
     override def toString(): String = {
@@ -160,11 +150,9 @@ object Day18 extends Day(18){
     private def calcHash(loc:Key,lst: Set[Key]): String = (loc +: lst.toList.sortBy(k => k.c)).foldRight("")(_ + _)
 
     def addToCache(location:Key, toVisit: Set[Key],path: List[Key],cost: Int) = {
-      cacheMap = cacheMap + (calcHash(location,toVisit) -> (path,cost))
+      cacheMap += (calcHash(location,toVisit) -> (path,cost))
     }
 
     def getFromCache(location: Key,toVisit: Set[Key]) : Option[(List[Key],Int)] = cacheMap.get(calcHash(location,toVisit))
-
-
   }
 }
