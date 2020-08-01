@@ -3,7 +3,7 @@ package advent2019
 import scala.collection.mutable.ListBuffer
 
 object Day18 extends Day(18){
-  override def testSetA = List(TestCase("Day18_testa.txt","86"),TestCase("Day18_testa2.txt","132")/*,TestCase("Day18_testa3.txt","136"),TestCase("Day18_testa4.txt","81")*/)
+  override def testSetA = List(TestCase("Day18_testa.txt","86"),TestCase("Day18_testa2.txt","132"),TestCase("Day18_testa3.txt","136"),TestCase("Day18_testa4.txt","81"))
 
   override def testSetB = List()
 
@@ -47,7 +47,7 @@ object Day18 extends Day(18){
     }
 
     buffer.addToCache(currentKey,toVisit-currentKey++cannotVisitYet,bestPath,optimalCost)
-    println(bestPath.toString+": "+optimalCost)
+    //println(bestPath.toString+": "+optimalCost)
     (bestPath,optimalCost)
   }
 
@@ -126,8 +126,10 @@ object Day18 extends Day(18){
       result
     }
 
-    def addMove(fromKey: Key, toKey: Key, cost: Int, conditions: List[Door]): Grid =
+    def addMove(fromKey: Key, toKey: Key, cost: Int, conditions: List[Door]): Grid = {
+      if(getFromKeyOptions(fromKey).contains(toKey) && getFromKeyOptions(fromKey).get(toKey).get._1 < cost) return this
       new Grid(grid + (fromKey -> getFromKeyOptions(fromKey).+(toKey -> (cost, conditions))))
+    }
 
     def getKeys(): Set[Key] = grid.keySet
 
