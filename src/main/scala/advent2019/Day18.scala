@@ -16,9 +16,9 @@ object Day18 extends Day(18){
     println(distanceGrid.toString())
 
     val startOptions = distanceGrid.getNeighbours(Key('@',true))
-      .filter(k => distanceGrid.getVisitConditions(Key('@'),k).isEmpty)
+      .filter(k => distanceGrid.getVisitConditions(Key('@',true),k).isEmpty)
       .toList
-    val path = findShortestPathA(startOptions.toSet,List(Key('@'),true),
+    val path = findShortestPathA(startOptions.toSet,List(Key('@',true)),
       distanceGrid.getNeighbours(Key('@',true)) -- startOptions,distanceGrid,new Buffer())
 
     println("Result: "+path._1.reverse+" - "+path._2.toString)
