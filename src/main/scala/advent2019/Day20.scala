@@ -1,18 +1,15 @@
 package advent2019
 
 object Day20 extends Day(20){
-  override def testSetA = List(TestCase("Day20_testa1.txt","23"),TestCase("Day20_testa2.txt","58"))
+  override def testSetA = List(TestCase("Day20_testa1.txt","26"),TestCase("Day20_testa2.txt","58"))
 
-  override def testSetB = List()
+  override def testSetB = List(TestCase("Day20_testa2.txt","58"),TestCase("Day20_testb1.txt","396"))
 
   def StringPattern= "[A-Z]{2}".r
 
   override def solutionA(input: List[String], params: List[String]) = {
     val gridArr = readInputArr(input)
-    println(printArr(gridArr))
-
     val path = findShortestPath(List(("AA")),List(findLocation("AA",gridArr).head),gridArr)
-    println(path)
     path._2.toString
   }
 
@@ -28,20 +25,17 @@ object Day20 extends Day(20){
     var minResult = List[String]()
     var minVal = 0
     for(m <- validMoves(grid,track)){
-      println(m)
+      var newPath = (List[String](),0)
       grid(m._1)(m._2) match {
-        case "ZZ" =>
-          return (path:+grid(m._1)(m._2),distance+1)
-        case isPortal() => {
-          val newPath =  findShortestPath(path:+grid(m._1)(m._2), track :+findPortalTarget(m,grid),grid)
-          val newMinVal = newPath._2
-          if(newMinVal > 0 && (minVal == 0 || minVal > newMinVal)) {
-            minVal = newMinVal
-            minResult = newPath._1
-          }
-        }
-        case "." => return findShortestPath(path,track :+m,grid)
+        case "ZZ" => return (path:+grid(m._1)(m._2),distance)
+        case isPortal() => newPath =  findShortestPath(path:+(grid(m._1)(m._2)+track.size), track :+m :+ findPortalTarget(m,grid),grid)
+        case "." => newPath = findShortestPath(path,track :+m,grid)
         case _ => throw new Exception(s"Invalid grid value found: ${grid(m._1)(m._2)} at ${m}")
+      }
+      val newMinVal = newPath._2
+      if(newMinVal > 0 && (minVal == 0 || minVal > newMinVal)) {
+        minVal = newMinVal
+        minResult = newPath._1
       }
     }
 
@@ -94,8 +88,8 @@ object Day20 extends Day(20){
   }
 
   def insertHorizontalPortals(grid: Array[Array[String]],input: List[String],borderSize: Int):Array[Array[String]] = {
-    val regExLeft = ".*\\Q.\\E([A-Z]{2}).*".r
-    val regExRight = ".*([A-Z]{2})\\Q.\\E.*".r
+    val regExLeft = "\\Q.\\E([A-Z]{2})".r
+    val regExRight = "([A-Z]{2})\\Q.\\E".r
     for(i <- 0 until input.size){
       for(str <- regExLeft.findAllMatchIn(input(i)).map(f => f.group(1)))
         grid(i-borderSize)(input(i).indexOf(str)-borderSize-1) = str
