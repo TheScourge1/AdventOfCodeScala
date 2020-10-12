@@ -1,6 +1,6 @@
 package advent2019
 
-import advent2019.Day22.{Mcalc, getActionList, getLinearFunction, getReverseActionList, getSourceFromTarget}
+import advent2019.Day22.{Mcalc, forwardN, getActionList, getLinearFunction, getReverseActionList, getSourceFromTarget}
 import org.scalatest.FunSuite
 
 import scala.io.Source
@@ -42,8 +42,22 @@ class Day22Test extends FunSuite{
     assert(testVal == n2,"n1 -> n2")
   }
 
-  test("Day22.itterations"){
+  test("Day22.testForwardN") {
+    val n4 = 2020
+    val n3 = getSourceFromTarget(n4,input,cardCount)
+    val n2 = getSourceFromTarget(n3,input,cardCount)
+    val n1 = getSourceFromTarget(n2,input,cardCount)
 
+    val fPars = getLinearFunction(input,cardCount)
+
+    val testVal = forwardN(Mcalc(10,cardCount),Mcalc(3,cardCount),Mcalc(2,cardCount),3)
+    assert(testVal.v == 2*1000+(1000-1)/(10-1)*3,"2 -> 33")
+    val testN3 = forwardN(Mcalc(fPars._1,cardCount),Mcalc(fPars._2,cardCount),Mcalc(n2,cardCount),1)
+    assert(testN3.v == n3,"N2 -> n3")
+    val testN2 = forwardN(Mcalc(fPars._1,cardCount),Mcalc(fPars._2,cardCount),Mcalc(n2,cardCount),2)
+    assert(testN2.v == n4,"N2 -> n4")
+    val testN1 = forwardN(Mcalc(fPars._1,cardCount),Mcalc(fPars._2,cardCount),Mcalc(n1,cardCount),3)
+    assert(testN1.v == n4,"N1 -> n4")
   }
 
 }

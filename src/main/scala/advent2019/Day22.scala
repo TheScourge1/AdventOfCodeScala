@@ -49,16 +49,23 @@ object Day22 extends Day(22){
 
     val fx = getLinearFunction(input,cardCount) //Forward function of type ax+b
 
-    val totientN = cardCount-1
-    val e = itts
-    val d = Mcalc(1,totientN).div(Mcalc(e,totientN)).v
-    val r = Mcalc(endPos,cardCount).pow(d)
+    // Xn = X0 * a^n + (a^n -1) / (a-1) * b
+
     val a = Mcalc(fx._1,cardCount)
     val b = Mcalc(fx._2,cardCount)
-    val res = r.sub(b).div(a)
+    val Xn = Mcalc(endPos,cardCount)
+    val one = Mcalc(1,cardCount)
+    val n = itts
+
+    val subRes1 = (a.pow(n).sub(one)).mul(b)
+    val subRes2 = a.sub(one)
+    val subRes3 = Xn.sub((subRes1.div(subRes2)))
+    val res = subRes3.div(a.pow(n))
 
     res.v.toString
   }
+
+
 
   def getReverseActionList(actions: List[String]): List[(Long,(Long,Long,Long) => Long)] = {
       val cutPattern = "cut (-?[0-9]*)".r
@@ -118,7 +125,15 @@ object Day22 extends Day(22){
     (a,b)
   }
 
-  //def itterate(,m:Long)
+  // Xn = X0 * a^n + (a^n -1) / (a-1) * b
+  def forwardN(a:Mcalc, b:Mcalc, x0: Mcalc,n:Long): Mcalc = {
+    val one = Mcalc(1,a.m)
+    val part1 = x0.mul(a.pow(n))
+    val part2 = (a.pow(n).sub(one)).mul(b).div((a.sub(one)))
+    part1.add(part2)
+  }
+
+
 
   case class Mcalc(v:Long,m:Long){
     def add(b:Mcalc):Mcalc = Mcalc((m+v%m+b.v%m)%m,m)
@@ -150,9 +165,9 @@ object Day22 extends Day(22){
       var res = 1L
       var base = a%m
       while(rem > 0){
-        if(rem%2 != 0) res = (res * base)%m
+        if(rem%2 != 0) res = mulMod(res, base,m)
         rem = rem/2
-        base = (base * base)%m
+        base = mulMod(base,base,m)
       }
     res
     }
