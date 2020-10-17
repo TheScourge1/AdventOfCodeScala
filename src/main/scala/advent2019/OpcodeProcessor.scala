@@ -2,75 +2,6 @@ package advent2019
 
 object OpcodeProcessor {
 
-  case class Program(arr: Array[Long],position: Integer,output:List[String] = List(),baseOffset:Int = 0) {
-
-    def getCode: Int = { (arr(position)%100).toInt}
-    def curVal: Long = { arr(position)}
-
-    def getValue(mode: Int):Long = {
-      val location: Int = mode match {
-        case 0 => arr(position).toInt
-        case 1 => position
-        case 2 => baseOffset + arr(position).toInt
-        case _ => throw new Exception("Unknown parameter code")
-      }
-      if(location >= arr.size) 0
-      else arr(location)
-    }
-
-    def getParam(param: Int): Long = {
-      this.move(param).getValue(getModes(param-1))
-    }
-
-    def getModes: Array[Int] = {
-      return Array((curVal.toInt/100)%10,(curVal.toInt/1000)%10,(curVal.toInt/10000)%10)
-    }
-
-    def write(pos: Long,value: Long,mode: Int): Program = { write(pos.toInt,value,mode)}
-    def write(parPos: Int,value: Long,mode: Int): Program = {
-      val pos = if(mode == 2) baseOffset + parPos else parPos
-      if(pos >= arr.size){
-        val newArr = new Array[Long](pos+1)
-        arr.copyToArray(newArr)
-        Program(newArr,position,output,baseOffset).write(parPos,value,mode)
-      }
-      else {
-        arr(pos)=value
-        Program(arr,position,output,baseOffset)
-      }
-    }
-
-    def writeAt(param: Int,value: Long): Program = {
-      write(move(param).curVal,value, getModes(param-1))
-    }
-
-    def inputRequired(): Boolean = { getCode == 3}
-
-    def isFinished: Boolean = {
-      if(position == -1) return true
-      getCode == 99
-    }
-
-    def move(steps: Long): Program = {
-      Program(arr,position+steps.toInt,output,baseOffset)
-    }
-
-    def jumpTo(newPosition: Long): Program = {
-      Program(arr,newPosition.toInt,output,baseOffset)
-    }
-
-    def addOutput(s: String): Program = {
-      Program(arr,position,output :+ s,baseOffset)
-    }
-
-    def clearOutput():Program = {
-      Program(arr,position,List(),baseOffset)
-    }
-
-
-    def setRelativeBase(baseVal: Long) = { Program(arr,position,output,baseOffset+baseVal.toInt)}
-  }
-
   def processDay2OppCode(arr: Array[Int],position: Integer,input: () => Int,output: (Int) => Unit): (Array[Int]) = {
     arr(position) match {
       case 1 => {
@@ -95,7 +26,7 @@ object OpcodeProcessor {
     }
   }
 
-  def processDay5OppCode(prog: Program,input: List[Int]): (Program) = {
+  def processDay5OppCode(prog: Program,input: List[Long]): (Program) = {
     var inputList = input
     var program = prog
 
@@ -114,7 +45,8 @@ object OpcodeProcessor {
    program
   }
 
-  def executeStep(prog:Program,input: Int): (Program) = {
+
+  def executeStep(prog:Program,input: Long): (Program) = {
     prog.getCode match {
       case 1 => { //add
         prog.writeAt(3 ,prog.getParam(1)+prog.getParam(2))
@@ -164,4 +96,73 @@ object OpcodeProcessor {
       case _ => throw new Exception(s"Unknown value ${prog.curVal} at ${prog.position}")
     }
   }
+}
+
+case class Program(arr: Array[Long],position: Integer,output:List[String] = List(),baseOffset:Int = 0) {
+
+  def getCode: Int = { (arr(position)%100).toInt}
+  def curVal: Long = { arr(position)}
+
+  def getValue(mode: Int):Long = {
+    val location: Int = mode match {
+      case 0 => arr(position).toInt
+      case 1 => position
+      case 2 => baseOffset + arr(position).toInt
+      case _ => throw new Exception("Unknown parameter code")
+    }
+    if(location >= arr.size) 0
+    else arr(location)
+  }
+
+  def getParam(param: Int): Long = {
+    this.move(param).getValue(getModes(param-1))
+  }
+
+  def getModes: Array[Int] = {
+    return Array((curVal.toInt/100)%10,(curVal.toInt/1000)%10,(curVal.toInt/10000)%10)
+  }
+
+  def write(pos: Long,value: Long,mode: Int): Program = { write(pos.toInt,value,mode)}
+  def write(parPos: Int,value: Long,mode: Int): Program = {
+    val pos = if(mode == 2) baseOffset + parPos else parPos
+    if(pos >= arr.size){
+      val newArr = new Array[Long](pos+1)
+      arr.copyToArray(newArr)
+      Program(newArr,position,output,baseOffset).write(parPos,value,mode)
+    }
+    else {
+      arr(pos)=value
+      Program(arr,position,output,baseOffset)
+    }
+  }
+
+  def writeAt(param: Int,value: Long): Program = {
+    write(move(param).curVal,value, getModes(param-1))
+  }
+
+  def inputRequired(): Boolean = { getCode == 3}
+
+  def isFinished: Boolean = {
+    if(position == -1) return true
+    getCode == 99
+  }
+
+  def move(steps: Long): Program = {
+    Program(arr,position+steps.toInt,output,baseOffset)
+  }
+
+  def jumpTo(newPosition: Long): Program = {
+    Program(arr,newPosition.toInt,output,baseOffset)
+  }
+
+  def addOutput(s: String): Program = {
+    Program(arr,position,output :+ s,baseOffset)
+  }
+
+  def clearOutput():Program = {
+    Program(arr,position,List(),baseOffset)
+  }
+
+
+  def setRelativeBase(baseVal: Long) = { Program(arr,position,output,baseOffset+baseVal.toInt)}
 }

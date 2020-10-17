@@ -1,6 +1,6 @@
 package advent2019
 
-import advent2019.OpcodeProcessor.Program
+import advent2019.Program
 
 object Day15 extends Day(15) {
   override def testSetA = List()

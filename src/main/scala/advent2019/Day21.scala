@@ -2,7 +2,7 @@ package advent2019
 
 import java.nio.ByteBuffer
 
-import advent2019.OpcodeProcessor.Program
+import advent2019.Program
 
 object Day21 extends Day(21){
   override def testSetA = List()

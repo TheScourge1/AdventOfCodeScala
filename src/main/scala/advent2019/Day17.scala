@@ -1,7 +1,5 @@
 package advent2019
 
-import advent2019.OpcodeProcessor.Program
-
 import scala.collection.mutable.ListBuffer
 
 object Day17 extends Day(17){
