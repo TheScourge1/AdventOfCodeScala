@@ -3,7 +3,6 @@ package advent2019
 
 object Day23 extends Day(23){
   override def testSetA = List()
-
   override def testSetB = List()
 
   override def solutionA(input: List[String], params: List[String]):String = {
@@ -48,9 +47,6 @@ object Day23 extends Day(23){
   }
 
   def initNetwork(networkSize:Int,prog:Array[Long]): Network = {
-
-  import advent2019.Day23.executeProcess
-
   var network = List[Program]()
     var instructionMap = Map[Int,List[Long]]()
 
@@ -68,7 +64,6 @@ object Day23 extends Day(23){
   def executeProcess(network:Network,address:Int): Network = {
     val instructions = network.pendingInstructions.getOrElse(address,List(-1L))
     var newInstructions = network.pendingInstructions.updated(address, List.empty)
-
     var newCPU = OpcodeProcessor.processDay5OppCode(network.network(address), instructions)
 
     for (g <- newCPU.output.map(_.toLong).grouped(3))
@@ -78,11 +73,7 @@ object Day23 extends Day(23){
     Network(network.network.updated(address,newCPU),newInstructions)
   }
 
-
-
   case class Network(network:List[Program],pendingInstructions :Map[Int,List[Long]]){
-
     def hasPendingInstructions: Boolean = pendingInstructions.count(p => p._1 != 255 && p._2.size > 0) > 0
-
   }
 }
