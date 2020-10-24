@@ -17,10 +17,10 @@ class Day24Test extends FunSuite{
   test("countNeighbours"){
     val matrix = getMatrix(input)
 
-    assert(countNeigbours(matrix,0,0) ==1)
-    assert(countNeigbours(matrix,0,1) ==1)
-    assert(countNeigbours(matrix,2,0) ==0)
-    assert(countNeigbours(matrix,3,2) ==2)
+    assert(countNeigbours(null,matrix,null,0,0) ==1)
+    assert(countNeigbours(null,matrix,null,0,1) ==1)
+    assert(countNeigbours(null,matrix,null,2,0) ==0)
+    assert(countNeigbours(null,matrix,null,3,2) ==2)
   }
 
   test("ExecuteStep"){
