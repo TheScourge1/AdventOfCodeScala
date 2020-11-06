@@ -41,25 +41,25 @@ object Day17 extends Day(17){
     val route = getRoute(processOutput(res.output))
     val subRoutes = splitRoute(route)
 
-    var progInput = List[Int]()
+    var progInput = List[Long]()
     progInput = progInput ++ convertToIntCodes(subRoutes._2)
     for( l<- subRoutes._1)
       progInput = progInput ++ convertToIntCodes(l)
-    progInput = progInput :+ 'n'.toInt
-    progInput = progInput :+ 10
+    progInput = progInput :+ 'n'.toLong
+    progInput = progInput :+ 10L
 
     prog(0) = 2
     res = OpcodeProcessor.processDay5OppCode(Program(prog,0),progInput)
     res.output.last
   }
 
-  def convertToIntCodes(lst: List[String]): List[Int] = {
-    var result = List[Int]()
+  def convertToIntCodes(lst: List[String]): List[Long] = {
+    var result = List[Long]()
     for(s <- lst){
-      s.chars().forEach(c => result=result :+ c.toInt)
-      result=result :+ 44
+      s.chars().forEach(c => result=result :+ c.toLong)
+      result=result :+ 44L
     }
-    if(result.size > 0)  result.slice(0,result.size-1) :+ 10
+    if(result.size > 0)  result.slice(0,result.size-1) :+ 10L
     else result
   }
 

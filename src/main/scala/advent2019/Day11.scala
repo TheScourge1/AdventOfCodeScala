@@ -8,7 +8,7 @@ object Day11 extends Day(11) {
   override def solutionA(input: List[String], params: List[String]) = {
     val progVals = input(0).split(",").map(s => s.toLong)
 
-    var visitMap = Map[(Int,Int),Int]()
+    var visitMap = Map[(Int,Int),Long]()
     var loc = (1000,1000,"N")
     var program = Program(progVals,0)
 
@@ -26,7 +26,7 @@ object Day11 extends Day(11) {
   override def solutionB(input: List[String], params: List[String]) = {
     val progVals = input(0).split(",").map(s => s.toLong)
 
-    var visitMap = Map[(Int,Int),Int]()
+    var visitMap = Map[(Int,Int),Long]()
     var loc = (100,100,"N")
     var program = Program(progVals,0)
 

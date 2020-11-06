@@ -1,9 +1,5 @@
 package advent2019
 
-import java.nio.ByteBuffer
-
-import advent2019.Program
-
 object Day21 extends Day(21){
   override def testSetA = List()
 
@@ -30,7 +26,7 @@ object Day21 extends Day(21){
 
   }
 
-  def toIntCode(input:String): List[Int] = input.toCharArray.map(c => c.toInt).toList
+  def toIntCode(input:String): List[Long] = input.toCharArray.map(c => c.toLong).toList
 
   def toResultString(input: List[String]) = input.map(s=>s.toInt.toChar).foldLeft("")(_+_)
 }

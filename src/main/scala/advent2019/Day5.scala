@@ -1,7 +1,5 @@
 package advent2019
 
-import advent2019.Program
-
 object Day5 extends Day(5){
   override def testSetA = List(TestCase("3,0,4,0,99","1",List("1")))
   override def paramsA = List("1")
@@ -17,13 +15,13 @@ object Day5 extends Day(5){
 
   override def solutionA(input: List[String], params: List[String]) = {
     val program = input(0).split(",").map(s => s.toLong)
-    OpcodeProcessor.processDay5OppCode(Program(program,0),params.map(p => p.toInt)).output.reverse.head
+    OpcodeProcessor.processDay5OppCode(Program(program,0),params.map(p => p.toLong)).output.reverse.head
     //solution: 11193703
   }
 
   override def solutionB(input: List[String], params: List[String]) = {
     val program = input(0).split(",").map(s => s.toLong)
-    OpcodeProcessor.processDay5OppCode(Program(program,0),params.map(p => p.toInt)).output.head
+    OpcodeProcessor.processDay5OppCode(Program(program,0),params.map(p => p.toLong)).output.head
     //solution 12410607
   }
 }
