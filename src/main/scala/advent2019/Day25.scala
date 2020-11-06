@@ -5,14 +5,14 @@ object Day25 extends Day(25){
   override def testSetB = List()
 
   override def solutionA(input: List[String], params: List[String]) = {
-    val prog = input(0).split(",").map(s => s.toLong)
+    val prog = input.head.split(",").map(s => s.toLong)
     val startLocation = OpcodeProcessor.processDay5OppCode(Program(prog.clone(),0),List())
     val ship = visitShip(startLocation,new Ship(),List())
     printShip(ship)
 
     var program = OpcodeProcessor.processDay5OppCode(Program(prog.clone(),0),List())
-    for(location  <- ship.getLocations()){
-      if(ship.getItems(location).size > 0 && ship.getItems(location).intersect(Item.unpickables).size == 0)
+    for(location  <- ship.getLocations){
+      if(ship.getItems(location).nonEmpty && ship.getItems(location).intersect(Item.unpickables).isEmpty)
         program = pickItemsAt(program,location,ship)
     }
 
@@ -30,7 +30,7 @@ object Day25 extends Day(25){
 
  def visitShip(initProg: Program,ship:Ship,path: List[Command]): Ship = {
    val output = printOutput(initProg.output)
-   if(!output.contains(("Command?"))) throw new Exception("Error found:"+output)
+   if(!output.contains("Command?")) throw new Exception("Error found:"+output)
 
    var resultShip = ship
    var program = initProg.clearOutput()
@@ -45,7 +45,7 @@ object Day25 extends Day(25){
      resultShip = resultShip.setItems(location,itemList)
      resultShip = resultShip.setPath(location,path)
 
-     if(!location.equals(Location.SecurityCheckpoint)){
+     if(location != Location.SecurityCheckpoint)
        for(door <- doorList) {
          program = OpcodeProcessor.processDay5OppCode(program,door.getIntCode)
          if(printOutput(program.output).contains("You can't go that way"))
@@ -55,16 +55,14 @@ object Day25 extends Day(25){
          program = OpcodeProcessor.processDay5OppCode(program, Door.invert(door).getIntCode)
          program = program.clearOutput()
        }
-     }
    }
    resultShip
  }
 
- def printShip(ship:Ship): Unit ={
-   for(loc <- ship.getLocations()) {
-       println(s"${loc}: "+ship.getItems(loc) + "  => "+(ship.getPathToLocation(loc).map(c => c.name)))
-     }
- }
+ def printShip(ship:Ship): Unit =
+   for(loc <- ship.getLocations)
+     println(s"$loc: ${ship.getItems(loc)}  => "+ship.getPathToLocation(loc).map(c => c.name))
+
 
 
  def printOutput(text: List[String]): String = text.map(i => i.toInt.toChar).fold("")(_.toString + _.toString).toString
@@ -87,8 +85,8 @@ object Day25 extends Day(25){
    val listParse = (prefix+"((- [a-z0-9 ]+\\n)+)").r
    val cmd = "([a-z][ a-z0-9]*)".r
    val sequence = listParse.findAllMatchIn(str).map(r => r.group(1)).toList
-   if(sequence.size>0)
-     cmd.findAllIn(sequence(0)).toList
+   if(sequence.nonEmpty)
+     cmd.findAllIn(sequence.head).toList
    else List()
  }
 
@@ -144,7 +142,7 @@ object Day25 extends Day(25){
 
  case class Command(name: String,action: String){
 
-   def getIntCode(): List[Long] = {
+   def getIntCode: List[Long] = {
      action match {
        case "MOVE" =>  moveAsLong
        case "TAKE" => takeAsLong
@@ -161,12 +159,12 @@ object Day25 extends Day(25){
  }
 
  object Door {
-   val East = Command("east","MOVE")
-   val South = Command("south","MOVE")
-   val West = Command("west","MOVE")
-   val North = Command("north","MOVE")
+   val East:Command = Command("east","MOVE")
+   val South: Command = Command("south","MOVE")
+   val West:Command = Command("west","MOVE")
+   val North:Command = Command("north","MOVE")
 
-   def invert(command: Command) : Command = command match {
+   def invert(command: Command): Command = command match {
        case Door.East => Door.West
        case Door.West => Door.East
        case Door.North => Door.South
@@ -176,8 +174,8 @@ object Day25 extends Day(25){
  }
 
  case class Item(name: String){
-   def take = Command(name,"TAKE")
-   def drop = Command(name,"DROP")
+   def take:Command = Command(name,"TAKE")
+   def drop:Command = Command(name,"DROP")
  }
 
   object Item {
@@ -185,7 +183,7 @@ object Day25 extends Day(25){
   }
 
   object Location{
-    val SecurityCheckpoint =  Location("== Security Checkpoint ==")
+    val SecurityCheckpoint:Location =  Location("== Security Checkpoint ==")
   }
 
  class Ship {
@@ -194,16 +192,16 @@ object Day25 extends Day(25){
    private var doorsAt: Map[Location,List[Command]] = Map()
    private var pathToLocation: Map[Location,List[Command]] = Map()
 
-   def addLocation(loc: Location) = {locations = locations :+ loc;this}
-   def setItems(loc: Location,objects: List[Item]) = { itemsAt = itemsAt + (loc -> objects);this}
-   def setDoors(loc: Location,doors: List[Command]) = { doorsAt = doorsAt + (loc -> doors);this}
-   def setPath(loc: Location,path: List[Command]) = { pathToLocation = pathToLocation + (loc -> path);this}
+   def addLocation(loc: Location):Ship = {locations = locations :+ loc;this}
+   def setItems(loc: Location,objects: List[Item]):Ship = { itemsAt = itemsAt + (loc -> objects);this}
+   def setDoors(loc: Location,doors: List[Command]):Ship = { doorsAt = doorsAt + (loc -> doors);this}
+   def setPath(loc: Location,path: List[Command]):Ship = { pathToLocation = pathToLocation + (loc -> path);this}
    def visited(loc: Location): Boolean = locations.contains(loc)
 
-   def getLocations() = locations
-   def getDoors(loc: Location) = doorsAt.getOrElse(loc,List())
-   def getPathToLocation(loc: Location) = pathToLocation.getOrElse(loc,List())
-   def getItems(loc: Location) = itemsAt.getOrElse(loc,List())
+   def getLocations:List[Location]= locations
+   def getDoors(loc: Location):List[Command] = doorsAt.getOrElse(loc,List())
+   def getPathToLocation(loc: Location):List[Command] = pathToLocation.getOrElse(loc,List())
+   def getItems(loc: Location):List[Item] = itemsAt.getOrElse(loc,List())
  }
 
  case class Location(name: String)
