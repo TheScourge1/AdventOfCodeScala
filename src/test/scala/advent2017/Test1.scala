@@ -12,7 +12,7 @@ class Test1 extends FunSuite {
     assert(ex.ex1("1234") === "0")
     assert(ex.ex1("91212129") === "9")
 
-    println("Solution 1: "+ex.ex1FromFile("ex1_1.txt"))
+    println("Solution 1: "+ex.ex1FromFile("2017/ex1_1.txt"))
   }
 
   test("Exercise1.ex2") {
@@ -21,6 +21,6 @@ class Test1 extends FunSuite {
     assert(ex.ex2("123425") === "4")
     assert(ex.ex2("123123") === "12")
 
-    println("Solution 2: "+ex.ex2FromFile("ex1_1.txt"))
+    println("Solution 2: "+ex.ex2FromFile("2017/ex1_1.txt"))
   }
 }

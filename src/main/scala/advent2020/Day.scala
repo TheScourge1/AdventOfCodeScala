@@ -1,8 +1,8 @@
-package advent2019
+package advent2020
 
 import scala.io.Source
 
-abstract class Day(day: Int) extends App {
+trait Day extends App {
 
   case class TestCase(input: String,expectedResult: String,params :List[String]= List[String]()) {
     def eval(f: (String,List[String]) => String): Either[String,Boolean] = {
@@ -12,16 +12,23 @@ abstract class Day(day: Int) extends App {
     }
   }
 
+  //Specify the day to lookup input values
+  def day():Int
+
   // Define a set of testCases to test the result
   def testSetA: List[TestCase]
   def testSetB: List[TestCase]
 
   //Define the input value here.
-  def inputA(): String = {"Day"+day+".txt"}
-  def inputB(): String = {"Day"+day+".txt"}
+  def sourceA(): String = {"Day"+day+".txt"}
+  def sourceB(): String = {"Day"+day+".txt"}
 
   def paramsA: List[String] = List()
   def paramsB: List[String] = List()
+
+  final def inputA() = fileOrData(sourceA)
+  final def inputB() = fileOrData(sourceB)
+  final def testInput(input:String) = fileOrData(input)
 
   // Write the solution to the excercise here
   def solutionA(input: List[String],params: List[String] = List()): String

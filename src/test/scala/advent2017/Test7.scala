@@ -7,15 +7,15 @@ class Test7 extends FunSuite {
   val ex = Exercise7
 
   test("Exercise7.ex1") {
-    assert(ex.ex1FromFile("ex7_1test.txt") === "tknk")
+    assert(ex.ex1FromFile("2017/ex7_1test.txt") === "tknk")
 
-    println("Solution 1: "+ex.ex1FromFile("ex7_1.txt"))
+    println("Solution 1: "+ex.ex1FromFile("2017/ex7_1.txt"))
   }
 
   test("Exercise7.ex2") {
-    assert(ex.ex2FromFile("ex7_1test.txt") === "60")
+    assert(ex.ex2FromFile("2017/ex7_1test.txt") === "60")
 
-    println("Solution 2: "+ex.ex2FromFile("ex7_1.txt"))
+    println("Solution 2: "+ex.ex2FromFile("2017/ex7_1.txt"))
   }
 
 }
