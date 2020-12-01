@@ -51,8 +51,8 @@ trait Day extends App {
   }
 
   private def readFile(fname: String): Seq[String] = {
-    val fileHandle = getClass.getResourceAsStream("/2019/"+fname)
-    if(fileHandle == null) throw new Exception("File not found: "+"/2019/"+fname)
+    val fileHandle = getClass.getResourceAsStream("/2020/"+fname)
+    if(fileHandle == null) throw new Exception("File not found: "+"/2020/"+fname)
     return Source.fromInputStream(fileHandle).getLines.toSeq
   }
 
