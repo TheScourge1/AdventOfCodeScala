@@ -4,7 +4,6 @@ object Day6 extends Day{
   override def day() = 6
 
   override def testSetA = List(TestCase("abc\n\na\nb\nc\n\nab\nac\n\na\na\na\na\n\nb","11"))
-
   override def testSetB = List(TestCase("",""))
 
   override def solutionA(input: List[String], params: List[String]) :String =
@@ -16,10 +15,8 @@ object Day6 extends Day{
 
   def splitGroups(input: List[String]): List[List[String]] = {
     val splitIndexes = List(0) ++input.zipWithIndex.filter(_._1 == "").map(_._2)++List(input.size)
-    var visitGroups = List[List[String]]()
-    for(i <-0 until splitIndexes.size-1)
-      visitGroups = visitGroups :+ input.slice(splitIndexes(i),splitIndexes(i+1)).filter(_ != "")
-    visitGroups
+    (for(i <-0 until splitIndexes.size-1)
+      yield input.slice(splitIndexes(i),splitIndexes(i+1)).filter(_ != "")).toList
   }
 
   def countQuestions(answers: List[String]): Int =
