@@ -20,7 +20,7 @@ object Day7 extends Day {
 
   def readBag(input: String): Bag = {
     val bagParse = "([0-9]+) ([a-z ]+) bag".r
-    val bagName = input.split(" bags contain" )(0)
+    val bagName = input.split(" bags contain" ).head
     val subBags = (for(b <- bagParse.findAllMatchIn(input)) yield b.group(2) -> b.group(1).toInt).toMap
     Bag(bagName,subBags)
   }
