@@ -56,7 +56,9 @@ object Day21 extends Day{
     }
     result
   }
-}
 
   case class Food(id:Int,ingredients:Set[String],someAlergens:Set[String])
+}
+
+
 
