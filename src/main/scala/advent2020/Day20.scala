@@ -110,7 +110,6 @@ object Day20 extends Day{
 
   def rotateTopLeft(tile:Tile,leftEdge:String,topEdge:String,depth:Int): Option[Tile] = {
     def isValidPosition(tile:Tile,leftEdge:String,topEdge:String) = {
-     // println(tile.getEdges+ s" (${topEdge}, ${leftEdge} )")
       (tile.getEdges(0) == topEdge || tile.getEdges(0) == topEdge.reverse) &&
        (tile.getEdges(3) == leftEdge || tile.getEdges(3) == leftEdge.reverse)
     }
