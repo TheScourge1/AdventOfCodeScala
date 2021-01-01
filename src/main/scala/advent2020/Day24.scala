@@ -68,5 +68,4 @@ object Day24 extends Day{
     }
     locations.foldLeft((0,0))(((a,b) => (a._1 + b._1,a._2+b._2)))
   }
-
 }
